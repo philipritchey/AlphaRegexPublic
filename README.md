@@ -12,14 +12,14 @@ Please cite our paper if you find our work is intriguing.
 ## How to build
 After you clone this project, follow the steps below (on Ubuntu).
 - Install and initialize dependencies:
-  - `sudo apt install ocamlbuild ocaml-findlib opam time`
+  - `sudo apt install opam time`
   - `opam init -y`
-  - `echo "test -r ~/.opam/opam-init/init.sh && . ~/.opam/opam-init/init.sh > /dev/null 2> /dev/null || true" >> ~/.profile`
+  - `echo -e "\n\ntest -r ~/.opam/opam-init/init.sh && . ~/.opam/opam-init/init.sh > /dev/null 2> /dev/null || true" >> ~/.profile`
   - `eval $(opam env --switch=default)`
-  - `opam install batteries`
-  - ran out of disk space...
+  - `opam install batteries camlp-streams dune num ocamlbuild ocamlfind`
 - Activate the build script: `chmod u+x build`.
 - Compile the whole files using the script: `./build`.
+  - !!! failed
 
 ## How to use
 To use AlphaRegex, you need to provide:
