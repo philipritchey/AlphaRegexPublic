@@ -1,0 +1,5 @@
+.coverage
+.venv/
+__pycache__/
+_build/
+.vscode/
