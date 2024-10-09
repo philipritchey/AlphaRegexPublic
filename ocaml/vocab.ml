@@ -5,7 +5,7 @@ type mode =
 let mode = ref DEFAULT
 
 (* fixpoint operator *)
-let rec fix f x = 
+let rec fix f x =
   let x' = f x in
     if x = x' then x else fix f x'
 
@@ -32,7 +32,7 @@ let list_fold : ('a -> 'b -> 'b) -> 'a list -> 'b -> 'b
 
 let list2set l = list_fold BatSet.add l BatSet.empty
 
-let rec remove_dups lst 
+let rec remove_dups lst
 = match lst with
   | [] -> []
-  | h::t -> h::(remove_dups (List.filter (fun x -> x<>h) t)) 
+  | h::t -> h::(remove_dups (List.filter (fun x -> x<>h) t))

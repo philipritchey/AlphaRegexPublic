@@ -18,4 +18,4 @@ while [ $# -ne 0 ] && [ ! -z $1 ]; do
 done
 
 
-time ocamlbuild $TARGET -use-ocamlfind -Is $INCLUDE_DIRS
+time ocamlbuild -use-ocamlfind -Is $INCLUDE_DIRS $TARGET
