@@ -10,26 +10,30 @@ For the more details, please refer to our GPCE '16 paper ["Synthesizing Regular 
 Please cite our paper if you find our work is intriguing.
 
 ## How to build
+### Install and Initialize Dependencies
+- `sudo apt install opam time`
+- `opam init -y`
+- `echo -e "\n\ntest -r ~/.opam/opam-init/init.sh && . ~/.opam/opam-init/init.sh > /dev/null 2> /dev/null || true" >> ~/.profile`
+- `eval $(opam env --switch=default)`
+- `opam install batteries camlp-streams dune num ocamlbuild ocamlfind`
+
+### Build
 After you clone this project, follow the steps below (on Ubuntu).
-- Install and initialize dependencies:
-  - `sudo apt install opam time`
-  - `opam init -y`
-  - `echo -e "\n\ntest -r ~/.opam/opam-init/init.sh && . ~/.opam/opam-init/init.sh > /dev/null 2> /dev/null || true" >> ~/.profile`
-  - `eval $(opam env --switch=default)`
-  - `opam install batteries camlp-streams dune num ocamlbuild ocamlfind`
-- Activate the build script: `chmod u+x build`.
-- Compile the whole files using the script: `./build`.
-  - !!! failed
+- `dune build`
 
 ## How to use
 To use AlphaRegex, you need to provide:
 - Positive examples
 - Negative examples
 
+```
+dune exec ./main.exe -- -input <filename>
+```
+
 Then, AlphaRegex quickly derives a regular expression that accepts all the positive examples and rejects all the negative examples.
-For example, type `./main.native -input benchmakrs/no1_start_with_0`, then AlphaRegex instantly generate the solution ```0(0+1)^*```.
+For example, run `dune exec ./main.exe -- -input ../benchmarks/no1_start_with_0`, then AlphaRegex should generate the solution `0(0+1)*`.
 In the `benchmarks` directory, there are benchmark examples that we used for evaluation and you can easily check how positive/negative examples should be given to AlphaRegex.
 
 ## Contact
 AlphaRegex is maintained by [Programming Research Laboratory in Korea University](http://prl.korea.ac.kr).
-If you have any questions, feel free to email us: hakjoo\_oh@korea.ac.kr, sunbeom\_so@korea.ac.kr 
+If you have any questions, feel free to email us: hakjoo\_oh@korea.ac.kr, sunbeom\_so@korea.ac.kr
