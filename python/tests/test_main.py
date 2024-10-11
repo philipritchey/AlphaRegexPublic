@@ -60,3 +60,9 @@ def test_search_length_is_a_multiple_of_3():
 #     N = {'0', '10', '00', '010', '10', '110', '0010', '0011', '0110', '0111'}
 #     pattern = search(P, N)
 #     assert pattern == '((0)?1)*'
+
+def test_no5_length_at_least3_and_third_0():
+    P = {'XX0', 'XX0X', 'XX0XX'}
+    N = {'X', 'XX', 'XX1', 'XX1X'}
+    pattern = search(P, N).replace('X', '.')
+    assert pattern == '..0(.)*'
