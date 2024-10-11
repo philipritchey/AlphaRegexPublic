@@ -45,8 +45,8 @@ let record_arguments : string -> 'a -> unit =
 
 (** (internal procedure) *)
 let max_check : string -> float -> 'a -> unit =
-  fun name t args ->
-    let v = 
+  fun name t _args ->
+    let v =
       if (BatMap.mem name !max_log) then
         (BatMap.find name !max_log)
       else
@@ -55,10 +55,10 @@ let max_check : string -> float -> 'a -> unit =
     in
       if !v < t then
         begin
-          (* record_arguments name args; *)
+          (* record_arguments name _args; *)
           v := t
         end
-      
+
 let max_check =
   if record_max_time then max_check
   else (fun _ _ _ -> ())
@@ -117,7 +117,7 @@ let finish_event : string -> unit =
       end
     else
       ()
-              
+
 let make_filename : unit -> string =
   fun () ->
     let name : int -> string =
@@ -163,5 +163,5 @@ let report : out_channel -> unit =
       end
     else
       ()
-		
+
 let reset () = log := BatMap.empty; log_start := Sys.time()

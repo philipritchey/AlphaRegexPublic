@@ -1,7 +1,6 @@
 #!/bin/bash
 
 TARGET=main.native
-INCLUDE_DIRS=lib
 
 function clean
 {
@@ -18,4 +17,4 @@ while [ $# -ne 0 ] && [ ! -z $1 ]; do
 done
 
 
-time ocamlbuild -use-ocamlfind -Is $INCLUDE_DIRS $TARGET
+time ocamlbuild -use-ocamlfind $TARGET

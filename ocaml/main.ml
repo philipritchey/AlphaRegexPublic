@@ -35,7 +35,7 @@ let read_examples : string -> (str list*str list) option
     let (p_pos,_) = List.fold_left (fun (pos,idx) l ->
                         if BatString.get l 0 = '+' then (idx,idx+1) else (pos,idx+1)) (0,0) lines in
     (* find the position of negative examples *)
-    let (n_pos,idx) = List.fold_left (fun (pos,idx) l ->
+    let (n_pos,_) = List.fold_left (fun (pos,idx) l ->
                         if BatString.get l 0 = '-' then (idx,idx+1) else (pos,idx+1)) (0,0) lines in
     let pos_examples = list_get lines (p_pos+1) (n_pos-1) in
     let neg_examples = list_get lines (n_pos+1) (List.length lines - 1) in
@@ -60,7 +60,7 @@ let sanity_check exp pos_examples neg_examples =
 
 
 let main () =
- let _ = Arg.parse options (fun s -> ()) usageMsg in
+ let _ = Arg.parse options (fun _ -> ()) usageMsg in
  let t0 = Sys.time () in
  let _ = Profiler.start_logger () in
  let examples = read_examples !inputfile in
