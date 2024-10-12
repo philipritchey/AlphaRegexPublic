@@ -140,7 +140,8 @@ class PartialRegexNode:
         return 1
 
     def cost(self) -> int:
-        return self.get_cost() + int(10 ** (self.get_depth() - 2))
+        return self.get_cost()
+        # return self.get_cost() + int(10 ** (self.get_depth() - 2))
 
 
     def copy(self) -> Self:
