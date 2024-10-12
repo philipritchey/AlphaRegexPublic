@@ -405,3 +405,9 @@ def test_opt_optional():
     assert opt(ZeroOrOne(Concatenation(Literal('e'), Star(Literal('e'))))) == Star(Literal('e'))
     # (e*e)? -> e*
     assert opt(ZeroOrOne(Concatenation(Star(Literal('e')), Literal('e')))) == Star(Literal('e'))
+
+def test_opt_multiple_repeat():
+    state = Concatenation(Literal('.'), Union(EmptyString(), Union(EmptyString(), Hole())))
+    overapproximation = state.overapproximation()
+    opt2_overapproximation = opt(opt(overapproximation))
+    assert str(opt2_overapproximation) == '..*'

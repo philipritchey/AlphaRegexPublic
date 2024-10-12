@@ -111,22 +111,23 @@ class PartialRegexNode:
         return self.literal
 
     def get_cost(self) -> int:
-        c_literal = 20
+        c_literal = 1
         c_concatenation = 5
         c_star = 20
         c_optional = 20
         c_union = 30
         c_hole = 100
-        if self.type == PartialRegexNodeType.HOLE:
-            return c_hole
-        if self.type == PartialRegexNodeType.STAR:
-            return self.left.cost() + c_star
-        if self.type == PartialRegexNodeType.OPTIONAL:
-            return self.left.cost() + c_optional
-        if self.type == PartialRegexNodeType.CONCATENATION:
-            return self.left.cost() + self.right.cost() + c_concatenation
-        if self.type == PartialRegexNodeType.UNION:
-            return self.left.cost() + self.right.cost() + c_union
+        match self.type:
+            case PartialRegexNodeType.HOLE:
+                return c_hole
+            case PartialRegexNodeType.STAR:
+                return self.left.cost() + c_star
+            case PartialRegexNodeType.OPTIONAL:
+                return self.left.cost() + c_optional
+            case PartialRegexNodeType.CONCATENATION:
+                return self.left.cost() + self.right.cost() + c_concatenation
+            case PartialRegexNodeType.UNION:
+                return self.left.cost() + self.right.cost() + c_union
         return c_literal
 
     def get_depth(self):

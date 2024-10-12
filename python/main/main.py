@@ -2,12 +2,18 @@ import heapq
 import re
 import sys
 from time import time
-from main.partial_regex import PartialRegexNode, Hole
+from main.partial_regex import PartialRegexNode, Hole, opt
 
 def matches_all(pattern: str, examples: set[str]) -> bool:
     for example in examples:
-        if not re.fullmatch(pattern, example):
-            return False
+        try:
+            if not re.fullmatch(pattern, example):
+                return False
+        except re.error as err:
+            print(f'[FATAL] {err}')
+            print(f'[DEBUG] {pattern=}')
+            print(f'[DEBUG] {example=}')
+            raise
     return True
 
 def matches_any(pattern: str, examples: set[str]) -> bool:
@@ -63,17 +69,30 @@ def inflate_all(example_set: set[str], alphabet: str) -> set[str]:
     return s
 
 def solution(state: PartialRegexNode, P: set[str], N: set[str]) -> bool:
-    pattern = str(state)
-    return state.holes() == 0 and matches_all(pattern, P) and not matches_any(pattern, N)
+    if state.holes() > 0:
+        return False
+    pattern = str(opt(state))
+    # print(f'[DEBUG] {pattern=}')
+    return matches_all(pattern, P) and not matches_any(pattern, N)
 
 def dead(state: PartialRegexNode, P: set[str], N: set[str]) -> bool:
     # check for deadness
-    overapproximation = str(state.overapproximation())
-    if not matches_all(overapproximation, P):
-        # dead
-        return True
+    o = state.overapproximation()
+    s = opt(opt(o))
+    overapproximation = str(s)
+    try:
+        if not matches_all(overapproximation, P):
+            # dead
+            return True
+    except re.error:
+        print('state:', repr(state))
+        print('o', repr(o))
+        print('s', repr(s))
+        raise
 
-    underapproximation = str(state.underapproximation())
+    u = state.underapproximation()
+    s = opt(opt(u))
+    underapproximation = str(s)
     if matches_any(underapproximation, N):
         # dead
         return True
@@ -81,7 +100,7 @@ def dead(state: PartialRegexNode, P: set[str], N: set[str]) -> bool:
     # redundant states
     A = state.unroll().split()
     for e in A:
-        overapproximation = e.overapproximation()
+        overapproximation = opt(opt(e.overapproximation()))
         if not matches_any(str(overapproximation), P):
             # dead
             return True
