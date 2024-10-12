@@ -415,7 +415,8 @@ def test_opt_union():
   assert opt(Union(Concatenation(Literal('a'), Literal('b')), ZeroOrOne(Literal('c')))) == Union(Concatenation(Literal('a'), Literal('b')), ZeroOrOne(Literal('c')))
   # a|(b|c) -> a|(b|c)
   assert opt(Union(Literal('a'), Union(Literal('b'), Literal('c')))) == Union(Literal('a'), Union(Literal('b'), Literal('c')))
-
+  # a?|(b|c)
+  assert opt(Union(ZeroOrOne(Literal('a')), Union(Literal('b'), Literal('c')))) == Union(ZeroOrOne(Literal('a')), Union(Literal('b'), Literal('c')))
 
 def test_opt_star():
   # e** -> e*
