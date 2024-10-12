@@ -1,7 +1,7 @@
 import heapq
 import re
 from main.partial_regex import PartialRegexNode, Hole
-from main.main import get_literals, matches_all, matches_any, solution
+from main.main import get_literals, matches_all, matches_any, inflate_all
 from typing import Set, List
 
 def dead(state: PartialRegexNode, P: Set[str], N: Set[str]) -> bool:
@@ -11,13 +11,13 @@ def dead(state: PartialRegexNode, P: Set[str], N: Set[str]) -> bool:
     if not matches_all(overapproximation, P):
         # dead
         return True
-    
+
     underapproximation = str(state.underapproximation())
     print(f'  under={underapproximation}')
     if matches_any(underapproximation, N):
         # dead
         return True
-    
+
     # redundant states
     A = state.unroll().split()
     for e in A:
@@ -27,58 +27,6 @@ def dead(state: PartialRegexNode, P: Set[str], N: Set[str]) -> bool:
             # dead
             return True
     return False
-
-def search(P: Set[str], N: Set[str], **kwargs) -> str:
-    '''
-    find a regex that matches all p in P and not any n in N
-
-    Args
-        P: set of positive examples
-        N: set of negative examples
-        keywords
-            pause - pause after every step
-            verbose - print more info
-            initial - inital expression from which to search
-            
-    '''
-    pause = kwargs['pause'] if 'pause' in kwargs else True
-    verbose = kwargs['verbose'] if 'verbose' in kwargs else True
-    initial = kwargs['initial'] if 'initial' in kwargs else Hole()
-
-    literals = get_literals(P)
-    print(f'{literals=}')
-    initial = Hole()
-    q: List[PartialRegexNode] = []
-    heapq.heappush(q, initial)
-    v_pre = set()
-    v_post = set()
-    while True:
-        input('Press enter to continue...')
-        print(f'|q|= {len(q)}')
-        state = heapq.heappop(q)
-        if state in v_post:
-            continue
-        v_post.add(state)
-        print(f'state={state}, {state.cost()}')
-        if solution(state, P, N):
-            return str(state)
-        else:
-            if dead(state, P, N):
-                print('  is DEAD')
-                continue
-            # if not dead, expand and add to queue
-            print('  is ALIVE')
-            print('  next states:')
-            for next_state in state.next_states(literals):
-                print(f'    {next_state}', end='')
-                if next_state not in v_pre:
-                    heapq.heappush(q, next_state)
-                    v_pre.add(next_state)
-                    print(' (new)')
-                else:
-                    print()
-
-
 
 def interactive_search(P: Set[str], N: Set[str], **kwargs) -> str:
     pause = kwargs['pause'] if 'pause' in kwargs else True
@@ -167,16 +115,18 @@ def interactive_search(P: Set[str], N: Set[str], **kwargs) -> str:
                     print()
 
 if __name__ == '__main__':
-    P = {}
-    N = {}
-    pattern = interactive_search(P, N)
+    P = {'XX0', 'XX0X', 'XX0XX'}  # OK to have X in P because . will match it
+    N = inflate_all({'X', 'XX', 'XX1', 'XX1X'}, get_literals(P).replace('.', ''))  # not OK to have X in N since no literals will match it
+    pattern = interactive_search(P, N, pause=False)
+    print(f'{pattern=}')
+    assert pattern == '..0(.)*'
     # P = {'0101', '00101', '01010', '10101', '01011', '1101111001000101100111000'}
     # N = {'0', '1', '00', '01', '10', '11', '000', '001', '010', '011', '100', '101', '110', '111','0000', '0001', '0010', '0011', '0100', '0110', '0111', '1000', '1001', '1010', '1011', '1100', '1101', '1110', '1111'}
     # 6300 steps (but not always?)
     # pattern = interactive_search(P, N, pause=False, verbose=False)
     # 10119 steps
     # pattern = interactive_search(P, N, initial=Hole()*Hole(), pause=False, verbose=False)
-    # 5925 steps 
+    # 5925 steps
     # pattern = interactive_search(P, N, initial=Star()*Hole(), pause=False, verbose=False)
     # 5249 steps
     # pattern = interactive_search(P, N, initial=Hole()*Star(), pause=False, verbose=False)
@@ -196,4 +146,4 @@ if __name__ == '__main__':
     # pattern = interactive_search(P, N, initial=Hole()*Literal('0')*Literal('1')*Literal('0')*Hole()*Hole(), pause=False, verbose=False)
     # 29 steps
     # pattern = interactive_search(P, N, initial=Hole()*Literal('0')*Literal('1')*Literal('0')*Literal('1')*Hole(), pause=False, verbose=False)
-    assert pattern == '(.)*0101(.)*'
+    #assert pattern == '(.)*0101(.)*'

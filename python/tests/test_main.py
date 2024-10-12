@@ -1,4 +1,4 @@
-from main.main import matches_all, matches_any, search, get_literals
+from main.main import matches_all, matches_any, search, get_literals, inflate
 
 def test_matches_all():
     examples = {'0', '00', '01', '001'}
@@ -66,3 +66,12 @@ def test_no5_length_at_least3_and_third_0():
     N = {'X', 'XX', 'XX1', 'XX1X'}
     pattern = search(P, N).replace('X', '.')
     assert pattern == '..0(.)*'
+
+def test_inflate():
+    e = 'X'
+    es = inflate(e,'01')
+    assert es == ['0', '1']
+
+    e = 'XX'
+    es = inflate(e, '01')
+    assert es == ['00', '01', '10', '11']

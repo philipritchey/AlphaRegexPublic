@@ -17,12 +17,50 @@ def matches_any(pattern: str, examples: set[str]) -> bool:
     return False
 
 def get_literals(examples: set[str]) -> str:
-    literals = '.'
+    literals = 'X.'
     for example in examples:
         for symbol in example:
             if symbol not in literals:
                 literals += symbol
-    return literals
+    # 'X' is same thing as '.', so exclude it
+    return literals[1:]
+
+def inflate(example: str, alphabet: str) -> list[str]:
+    '''
+    replace each X with a in alphabet
+
+    Args:
+        example (set[str]): example to inflate
+        alphabet (str): alphabet to use
+
+    Returns:
+        list[str]: inflated examples
+    '''
+    if 'X' not in example:
+        return [example]
+    inflated_examples = []
+    for a in alphabet:
+        es = inflate(example.replace('X', a, 1), alphabet)
+        inflated_examples.extend(es)
+    return inflated_examples
+
+def inflate_all(example_set: set[str], alphabet: str) -> set[str]:
+    '''
+    replace each X with a in alphabet
+
+    Args:
+        example_set (set[str]): examples to inflate
+        alphabet (str): alphabet to use
+
+    Returns:
+        set[str]: inflated set of examples
+    '''
+    s: set[str] = set()
+    for example in example_set:
+        inflated_examples = inflate(example, alphabet)
+        for e in inflated_examples:
+            s.add(e)
+    return s
 
 def solution(state: PartialRegexNode, P: set[str], N: set[str]) -> bool:
     pattern = str(state)
@@ -51,6 +89,7 @@ def dead(state: PartialRegexNode, P: set[str], N: set[str]) -> bool:
 
 def search(P: set[str], N: set[str]) -> str:
     literals = get_literals(P)
+    N = inflate_all(N, literals.replace('.', ''))
     initial = Hole()
     q: list[PartialRegexNode] = []
     heapq.heappush(q, initial)
