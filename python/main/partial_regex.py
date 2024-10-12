@@ -55,6 +55,8 @@ class PartialRegexNode:
       return 'Hole()'
     if self.type == PartialRegexNodeType.STAR:
       return f"Star({repr(self.left)})"
+    if self.type == PartialRegexNodeType.OPTIONAL:
+      return f"ZeroOrOne({repr(self.left)})"
     if self.type == PartialRegexNodeType.EMPTY_STRING:
       return 'EmptyString()'
     if self.type == PartialRegexNodeType.EMPTY_LANGUAGE:
@@ -413,10 +415,10 @@ def opt(s: PartialRegexNode) -> PartialRegexNode:
           f1 = e1.left
           f2 = e1.right
           if f1 == e2.left:
-            # (e2|f2)e2? -> f2|e2?
+            # (e2|f2)|e2? -> f2|e2?
             return Union(f2, ZeroOrOne(e2.left))
           if f2 == e2.left:
-            # (f1|e2)e2? -> f1|e2?
+            # (f1|e2)|e2? -> f1|e2?
             return Union(f1, ZeroOrOne(e2.left))
       if e1.type == PartialRegexNodeType.STAR:
         # e1*|e2

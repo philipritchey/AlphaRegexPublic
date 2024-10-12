@@ -385,7 +385,14 @@ def test_opt_union():
   assert opt(Union(Union(Literal('e'), Literal('e')), Union(Literal('e'), Literal('e')))) == Literal('e')
   # (e|e)|(f|f) -> e|f
   assert opt(Union(Union(Literal('e'), Literal('e')), Union(Literal('f'), Literal('f')))) == Union(Literal('e'), Literal('f'))
+  # e|e? -> e?
+  assert opt(Union(Literal('e'), ZeroOrOne(Literal('e')))) == ZeroOrOne(Literal('e'))
+  # (e2|f2)|e2? -> f2|e2?
+  assert opt(Union(Union(Literal('a'), Literal('b')), ZeroOrOne(Literal('a')))) == Union(Literal('b'), ZeroOrOne(Literal('a')))
+  # (f1|e2)|e2? -> f1|e2?
+  assert opt(Union(Union(Literal('b'), Literal('a')), ZeroOrOne(Literal('a')))) == Union(Literal('b'), ZeroOrOne(Literal('a')))
 
+  # (a|b)c* - >(a|b)c*
   assert opt(Union(Union(Literal('a'), Literal('b')), Star(Literal('c')))) == Union(Union(Literal('a'), Literal('b')), Star(Literal('c')))
 
 def test_opt_star():
