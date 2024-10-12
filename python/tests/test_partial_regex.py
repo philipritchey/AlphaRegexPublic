@@ -452,3 +452,6 @@ def test_overapproximation_of_optional():
 
 def test_underapproximation_of_optional():
   assert ZeroOrOne().underapproximation() == ZeroOrOne(EmptyLanguage())
+
+def test_repr_optional():
+  assert repr(ZeroOrOne()) == 'ZeroOrOne(Hole())'
