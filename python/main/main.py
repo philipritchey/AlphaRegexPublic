@@ -125,7 +125,6 @@ def main(examples: str) -> None:
                 active_set = N
             else:
                 active_set.add(line)
-    print(description)
     t1 = time()
     pattern = search(P, N)
     t2 = time()
@@ -134,13 +133,12 @@ def main(examples: str) -> None:
     if dt < 1:
         dt *= 1000
         units = 'ms'
-    print(f'{dt:0.2f} {units}')
-
+    print(f'{description} | {pattern} | {dt:0.2f} {units}')
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
         print('error: missing required examples filename')
         sys.exit(1)
     examples = sys.argv[1]
-    print(f'{examples=}')
+    # print(f'{examples=}')
     main(examples)

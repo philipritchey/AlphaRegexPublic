@@ -87,11 +87,20 @@ class PartialRegexNode:
         if self.type == PartialRegexNodeType.HOLE:
             return str(PartialRegexNodeType.HOLE)
         if self.type == PartialRegexNodeType.STAR:
-            if self.left.type in (PartialRegexNodeType.EMPTY_STRING, PartialRegexNodeType.EMPTY_LANGUAGE):
-                return str(self.left.type)
-            if self.left.type == PartialRegexNodeType.STAR:
-                return str(self.left)
-            return f'({self.left})*'
+            a = self.left
+            if a.type in (PartialRegexNodeType.EMPTY_STRING, PartialRegexNodeType.EMPTY_LANGUAGE):
+                return str(a.type)
+            if a.type == PartialRegexNodeType.STAR:
+                return str(a)
+            if a.type == PartialRegexNodeType.CONCATENATION:
+                b, c = a.left, a.right
+                if b.type == PartialRegexNodeType.STAR and c.type == PartialRegexNodeType.STAR:
+                    e, f = b.left, c.left
+                    # (e*f*)* -> (e|f)*
+                    return f'({e}|{f})*'
+            if a.type == PartialRegexNodeType.LITERAL:
+                return f'{a}*'
+            return f'({a})*'
         if self.type in (PartialRegexNodeType.EMPTY_STRING, PartialRegexNodeType.EMPTY_LANGUAGE):
             return str(self.type)
         return self.literal

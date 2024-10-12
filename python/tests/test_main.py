@@ -21,13 +21,13 @@ def test_search_starts_with_0():
     P = {'0', '00', '01', '000', '001', '010', '011'}
     N = {'', '1', '10', '11', '100', '101', '110', '111'}
     pattern = search(P, N)
-    assert pattern == '0(.)*'
+    assert pattern == '0.*'
 
 def test_search_ends_with_01():
     P = {'01', '001', '101', '0001', '0101', '1001', '1101'}
     N = {'', '0', '1', '00', '10', '11', '100', '110', '111'}
     pattern = search(P, N)
-    assert pattern == '(.)*01'
+    assert pattern == '.*01'
 
 # too slow (not yet observed to terminate, t > 30s)
 # def test_search_contains_0101():
@@ -40,13 +40,13 @@ def test_search_begin_with_1_end_with_0():
     P = {'10', '100', '110', '1000', '1010', '1100', '1110'}
     N = {'0', '1', '00', '01', '11', '000', '001', '010', '011', '101', '111'}
     pattern = search(P, N)
-    assert pattern == '1(.)*0'
+    assert pattern == '1.*0'
 
 def test_search_length_at_least_3_and_3rd_symbol_is_0():
     P = {'000', '010', '100', '110', '0000', '0001', '0100', '0101', '1000', '1001', '1100', '1101'}
     N = {'0', '1', '00', '01', '10', '11', '001', '011', '101', '111', '0010', '0011', '0110', '0111'}
     pattern = search(P, N)
-    assert pattern == '..0(.)*'
+    assert pattern == '..0.*'
 
 def test_search_length_is_a_multiple_of_3():
     P = {'', '000', '001', '010', '011', '100', '101', '110', '111', '000000', '010101', '000111', '000111010'}
@@ -65,7 +65,7 @@ def test_no5_length_at_least3_and_third_0():
     P = {'XX0', 'XX0X', 'XX0XX'}
     N = {'X', 'XX', 'XX1', 'XX1X'}
     pattern = search(P, N).replace('X', '.')
-    assert pattern == '..0(.)*'
+    assert pattern == '..0.*'
 
 def test_inflate():
     e = 'X'
@@ -77,8 +77,8 @@ def test_inflate():
     assert es == ['00', '01', '10', '11']
 
 def test_main():
-    main('../benchmarks/no1_start_with_0')
+    main('../benchmarks/no01_start_with_0')
     # main('../benchmarks/no2_end_with_01')
-    main('../benchmarks/no3_substring_0101')
+    main('../benchmarks/no03_substring_0101')
     # main('../benchmarks/no4_begin_1_end_0')
     # main('../benchmarks/no5_length_at_least3_and_third_0')

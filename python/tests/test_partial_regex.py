@@ -187,11 +187,11 @@ def test_repstar_to_string():
     s = Star()
     s.left = Star()
     s.left.left = Literal('a')
-    assert str(s) == '(a)*'
+    assert str(s) == 'a*'
 
     s.left.left = Star()
     s.left.left.left = Literal('a')
-    assert str(s) == '(a)*'
+    assert str(s) == 'a*'
 
 def test_count_holes():
     s = ((Hole() * Hole()) + (Hole() * Hole())) + (Literal('a') * (Literal('b') + Hole()))
@@ -305,11 +305,11 @@ def test_split_of_unroll():
 
     state = Star(Literal('e'))
     unrolled_state = state.unroll()
-    assert str(unrolled_state) == 'ee(e)*'
+    assert str(unrolled_state) == 'eee*'
     split_of_unrolled_state = unrolled_state.split()
     assert len(split_of_unrolled_state) == 1
     state = split_of_unrolled_state.pop()
-    assert str(state) == 'ee(e)*'
+    assert str(state) == 'eee*'
     assert repr(state) == "Concatenation(Concatenation(Literal('e'), Literal('e')), Star(Literal('e')))"
 
 def test_repr():
