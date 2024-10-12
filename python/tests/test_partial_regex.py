@@ -499,3 +499,8 @@ def test_underapproximation_of_optional():
 
 def test_repr_optional():
   assert repr(ZeroOrOne()) == 'ZeroOrOne(Hole())'
+
+def test_star_of_concat_stars_to_string():
+  # (e*f*)* -> (e|f)*
+  state = Star(Concatenation(Star(Literal('e')), Star(Literal('f'))))
+  assert str(state) == '(e|f)*'
