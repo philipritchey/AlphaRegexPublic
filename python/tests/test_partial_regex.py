@@ -437,6 +437,8 @@ def test_opt_star():
   assert opt(Star(Concatenation(ZeroOrOne(Literal('e')), Literal('e')))) == Star(Literal('e'))
   # (ee?)* -> e*
   assert opt(Star(Concatenation(Literal('e'), ZeroOrOne(Literal('e'))))) == Star(Literal('e'))
+  # (e*f*)* -> (e|f)*
+  assert opt(Star(Concatenation(Star(Literal('e')), Star(Literal('f'))))) == Star(Union(Literal('e'), Literal('f')))
 
 def test_opt_optional():
   # e?? -> e?
