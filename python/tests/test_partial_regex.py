@@ -440,3 +440,6 @@ def test_get_depth():
 
 def test_overapproximation_of_optional():
   assert ZeroOrOne().overapproximation() == ZeroOrOne(Star(Literal('.')))
+
+def test_underapproximation_of_optional():
+  assert ZeroOrOne().underapproximation() == ZeroOrOne(EmptyLanguage())
