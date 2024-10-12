@@ -436,3 +436,4 @@ def test_get_depth():
   assert ZeroOrOne().get_depth() == 2
   assert Concatenation().get_depth() == 2
   assert Union().get_depth() == 2
+  assert Literal('a').get_depth() == 1
