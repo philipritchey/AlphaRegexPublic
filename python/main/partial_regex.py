@@ -116,7 +116,7 @@ class PartialRegexNode:
         c_star = 20
         c_optional = 20
         c_union = 30
-        c_hole = 1000000
+        c_hole = 100
         if self.type == PartialRegexNodeType.HOLE:
             return c_hole
         if self.type == PartialRegexNodeType.STAR:
