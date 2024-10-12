@@ -451,6 +451,9 @@ def test_opt_optional():
   # (e?f?)? -> e?f?
   assert opt(ZeroOrOne(Concatenation(ZeroOrOne(Literal('e')), ZeroOrOne(Literal('f'))))) == Concatenation(ZeroOrOne(Literal('e')), ZeroOrOne(Literal('f')))
 
+  # (ef?)? -> (ef?)?
+  assert opt(ZeroOrOne(Concatenation(Literal('e'), ZeroOrOne(Literal('f'))))) == ZeroOrOne(Concatenation(Literal('e'), ZeroOrOne(Literal('f'))))
+
 def test_opt_multiple_repeat():
   state = Concatenation(Literal('.'), Union(EmptyString(), Union(EmptyString(), Hole())))
   overapproximation = state.overapproximation()
