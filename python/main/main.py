@@ -87,9 +87,8 @@ def dead(state: PartialRegexNode, P: set[str], N: set[str]) -> bool:
             return True
     return False
 
-def search(P: set[str], N: set[str]) -> str:
-    literals = get_literals(P)
-    N = inflate_all(N, literals.replace('.', ''))
+def search(P: set[str], N: set[str], alphabet: str = '01') -> str:
+    N = inflate_all(N, alphabet)
     initial = Hole()
     q: list[PartialRegexNode] = []
     heapq.heappush(q, initial)
@@ -106,7 +105,7 @@ def search(P: set[str], N: set[str]) -> str:
             if dead(state, P, N):
                 continue
             # if not dead, expand and add to queue
-            for next_state in state.next_states(literals):
+            for next_state in state.next_states(alphabet):
                 if next_state not in v_pre:
                     heapq.heappush(q, next_state)
                     v_pre.add(next_state)

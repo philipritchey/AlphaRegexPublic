@@ -1,7 +1,6 @@
 import heapq
-import re
 from main.partial_regex import PartialRegexNode, Hole
-from main.main import get_literals, matches_all, matches_any, inflate_all
+from main.main import matches_all, matches_any, inflate_all
 from typing import Set, List
 
 def dead(state: PartialRegexNode, P: Set[str], N: Set[str]) -> bool:
@@ -28,12 +27,12 @@ def dead(state: PartialRegexNode, P: Set[str], N: Set[str]) -> bool:
             return True
     return False
 
-def interactive_search(P: Set[str], N: Set[str], **kwargs) -> str:
+def interactive_search(P: Set[str], N: Set[str], alphabet: str = '01', **kwargs) -> str:
     pause = kwargs['pause'] if 'pause' in kwargs else True
     verbose = kwargs['verbose'] if 'verbose' in kwargs else True
     initial = kwargs['initial'] if 'initial' in kwargs else Hole()
-    literals = get_literals(P)
-    print(f'{literals=}')
+    N = inflate_all(N, alphabet)
+    print(f'{N=}')
     q: List[PartialRegexNode] = []
     heapq.heappush(q, initial)
     v_pre = set()
@@ -103,7 +102,7 @@ def interactive_search(P: Set[str], N: Set[str], **kwargs) -> str:
             # if not dead, expand and add to queue
             if verbose:
                 print('  next states:')
-            for next_state in state.next_states(literals):
+            for next_state in state.next_states(alphabet):
                 if verbose:
                     print(f'    {next_state}, {next_state.cost()}', end='')
                 if next_state not in v_pre:
@@ -115,11 +114,18 @@ def interactive_search(P: Set[str], N: Set[str], **kwargs) -> str:
                     print()
 
 if __name__ == '__main__':
-    P = {'XX0', 'XX0X', 'XX0XX'}  # OK to have X in P because . will match it
-    N = inflate_all({'X', 'XX', 'XX1', 'XX1X'}, get_literals(P).replace('.', ''))  # not OK to have X in N since no literals will match it
-    pattern = interactive_search(P, N, pause=False)
+    P = {'XXX', 'XXXXXX'} # not OK to have only Xs in P because we need to know how to inflate N
+    N = {'X', 'XX', 'XXXX'}
+    pattern = interactive_search(P, N, '01', pause=False)
     print(f'{pattern=}')
-    assert pattern == '..0(.)*'
+    assert pattern == '(...)*'
+
+    # P = {'XX0', 'XX0X', 'XX0XX'}  # OK to have X in P because . will match it
+    # N = {'X', 'XX', 'XX1', 'XX1X'}  # not OK to have X in N since no literals will match it
+    # pattern = interactive_search(P, N, pause=False)
+    # print(f'{pattern=}')
+    # assert pattern == '..0(.)*'
+
     # P = {'0101', '00101', '01010', '10101', '01011', '1101111001000101100111000'}
     # N = {'0', '1', '00', '01', '10', '11', '000', '001', '010', '011', '100', '101', '110', '111','0000', '0001', '0010', '0011', '0100', '0110', '0111', '1000', '1001', '1010', '1011', '1100', '1101', '1110', '1111'}
     # 6300 steps (but not always?)

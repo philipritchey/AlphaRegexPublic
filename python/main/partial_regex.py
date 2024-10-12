@@ -30,7 +30,7 @@ class PartialRegexNode:
 
     def __hash__(self) -> int:
         return hash(str(self))
-    
+
     def __lt__(self, other: Self) -> bool:
         return self.cost() < other.cost()
 
@@ -39,7 +39,7 @@ class PartialRegexNode:
         s.left = self.copy()
         s.right = other.copy()
         return s
-    
+
     def __add__(self, other: Self) -> Self:
         s = PartialRegexNode(PartialRegexNodeType.UNION)
         s.left = self.copy()
@@ -73,11 +73,11 @@ class PartialRegexNode:
         if self.type == PartialRegexNodeType.UNION:
             if self.left.type == PartialRegexNodeType.EMPTY_STRING:
                 if self.right.type in (PartialRegexNodeType.CONCATENATION, PartialRegexNodeType.UNION):
-                    return f'({self.right})?'    
+                    return f'({self.right})?'
                 return f'{self.right}?'
             if self.right.type == PartialRegexNodeType.EMPTY_STRING:
                 if self.left.type in (PartialRegexNodeType.CONCATENATION, PartialRegexNodeType.UNION):
-                    return f'({self.left})?'    
+                    return f'({self.left})?'
                 return f'{self.left}?'
             if self.left.type == PartialRegexNodeType.EMPTY_LANGUAGE:
                 return str(self.right)
@@ -95,7 +95,7 @@ class PartialRegexNode:
         if self.type in (PartialRegexNodeType.EMPTY_STRING, PartialRegexNodeType.EMPTY_LANGUAGE):
             return str(self.type)
         return self.literal
-    
+
     def cost(self) -> int:
         c_literal = 1
         c_concatenation = 2
@@ -119,7 +119,7 @@ class PartialRegexNode:
         if self.right:
             s.right = self.right.copy()
         return s
-    
+
     def holes(self) -> int:
         cnt = 0
         q = [self]
@@ -134,7 +134,7 @@ class PartialRegexNode:
                     q.append(node.left)
         return cnt
 
- 
+
     def fill(self, s: Self, index: int = 0) -> Self:
         c = self.copy()
         q = [c]
@@ -159,7 +159,7 @@ class PartialRegexNode:
         states = []
         holes = self.holes()
         for hole in range(holes):
-            for literal in literals:
+            for literal in literals + '.':
                 states.append(self.fill(Literal(literal), hole))
             states.append(self.fill(EmptyString(), hole))
             states.append(self.fill(EmptyLanguage(), hole))
@@ -201,7 +201,7 @@ class PartialRegexNode:
         if self.type == PartialRegexNodeType.HOLE:
             return EmptyLanguage()
         raise ValueError(f'unknown type: {self.type}')
-    
+
     def unroll(self) -> Self:
         if self.type == PartialRegexNodeType.LITERAL:
             return Literal(self.literal)
@@ -219,7 +219,7 @@ class PartialRegexNode:
         if self.type == PartialRegexNodeType.HOLE:
             return Hole()
         raise ValueError(f'unknown type: {self.type}')
-    
+
     def split(self) -> Set[Self]:
         if self.type == PartialRegexNodeType.LITERAL:
             return {Literal(self.literal)}

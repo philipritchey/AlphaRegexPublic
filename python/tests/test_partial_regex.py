@@ -199,11 +199,11 @@ def test_count_holes():
 
 def test_state_expansion():
     s = Hole()
-    literals = '.01'
-    states = s.next_states(literals)
+    alphabet = '01'
+    states = s.next_states(alphabet)
     # ., 0, 1, empty string, empty language, [][], []|[], []*
     assert len(states) == 8
-    for literal in literals:
+    for literal in alphabet + '.':
         assert Literal(literal) in states
     assert EmptyString() in states
     assert EmptyLanguage() in states
@@ -213,10 +213,10 @@ def test_state_expansion():
 
 def test_state_expansion_2():
     s = Hole() * Hole()
-    literals = '.abc'
-    states = s.next_states(literals)
+    alphabet = 'abc'
+    states = s.next_states(alphabet)
     assert len(states) == 18
-    for literal in literals:
+    for literal in alphabet + '.':
         assert Literal(literal) * Hole() in states
         assert Hole() * Literal(literal) in states
     assert EmptyString() * Hole() in states
@@ -229,7 +229,7 @@ def test_state_expansion_2():
     assert Hole() * Concatenation() in states
     assert Hole() * Union() in states
     assert Hole() * Star() in states
-    
+
 def test_ordering():
     empty = EmptyString()
     hole = Hole()
@@ -263,7 +263,7 @@ def test_overapproximation():
     dot_star.left = Literal('.')
     assert Hole().overapproximation() == dot_star
     assert dot_star.overapproximation() == dot_star
-    
+
 def test_underapproximation():
     assert Literal('a').underapproximation() == Literal('a')
     assert EmptyString().underapproximation() == EmptyString()
@@ -274,14 +274,14 @@ def test_underapproximation():
     dot_star = Star()
     dot_star.left = Literal('.')
     assert dot_star.underapproximation() == dot_star
-    
+
 def test_approximations_with_unknown_type():
     s = PartialRegexNode(PartialRegexNodeType.OPTIONAL)
     with pytest.raises(ValueError):
         s.overapproximation()
     with pytest.raises(ValueError):
         s.underapproximation()
-        
+
 def test_hash():
     s1 = EmptyString()
     s2 = Star()
