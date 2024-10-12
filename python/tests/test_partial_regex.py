@@ -392,8 +392,12 @@ def test_opt_union():
   # (f1|e2)|e2? -> f1|e2?
   assert opt(Union(Union(Literal('b'), Literal('a')), ZeroOrOne(Literal('a')))) == Union(Literal('b'), ZeroOrOne(Literal('a')))
 
+  # not opt-able
   # (a|b)c* - >(a|b)c*
   assert opt(Union(Union(Literal('a'), Literal('b')), Star(Literal('c')))) == Union(Union(Literal('a'), Literal('b')), Star(Literal('c')))
+  # (a|b)|c? -> (a|b)|c?
+  assert opt(Union(Union(Literal('a'), Literal('b')), ZeroOrOne(Literal('c')))) == Union(Union(Literal('a'), Literal('b')), ZeroOrOne(Literal('c')))
+
 
 def test_opt_star():
   # e** -> e*
