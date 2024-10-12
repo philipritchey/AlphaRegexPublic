@@ -1,4 +1,4 @@
-from main.main import matches_all, matches_any, search, get_literals, inflate
+from main.main import matches_all, matches_any, search, get_literals, inflate, main
 
 def test_matches_all():
     examples = {'0', '00', '01', '001'}
@@ -75,3 +75,6 @@ def test_inflate():
     e = 'XX'
     es = inflate(e, '01')
     assert es == ['00', '01', '10', '11']
+
+def test_main():
+    main('tests/no4_begin_1_end_0')

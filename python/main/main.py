@@ -111,7 +111,7 @@ def search(P: set[str], N: set[str], alphabet: str = '01') -> str:
                     v_pre.add(next_state)
 
 
-def main(examples: str) -> str:
+def main(examples: str) -> None:
     P: set[str] = set()
     N: set[str] = set()
     with open(examples, 'r') as f:
@@ -127,9 +127,8 @@ def main(examples: str) -> str:
                 active_set.add(line)
     print(description)
     t1 = time()
-    solution = search(P, N)
+    pattern = search(P, N)
     t2 = time()
-    print(solution.replace('X', '.'))
     dt = t2 - t1
     units = 's'
     if dt < 1:
