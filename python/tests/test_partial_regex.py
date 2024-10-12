@@ -1,5 +1,5 @@
 import pytest
-from main.partial_regex import PartialRegexNode, PartialRegexNodeType, Literal, Union, Concatenation, Star, Hole, EmptyLanguage, EmptyString, opt
+from main.partial_regex import PartialRegexNode, PartialRegexNodeType, Literal, Union, Concatenation, Star, Hole, EmptyLanguage, EmptyString, opt, ZeroOrOne
 
 def test_concat_literals():
     s1 = Literal('a')
@@ -335,8 +335,20 @@ def test_opt_concatenation():
     assert opt(Concatenation(Concatenation(Literal('f'), Star(Literal('e'))), Star(Literal('e')))) == Concatenation(Literal('f'), Star(Literal('e')))
     # e*(e*f) -> e*f
     assert opt(Concatenation(Star(Literal('e')), Concatenation(Star(Literal('e')), Literal('f')))) == Concatenation(Star(Literal('e')), Literal('f'))
-    # (e*e*)(e*e*) -> e*e*
-    assert opt(Concatenation(Concatenation(Star(Literal('e')), Star(Literal('e'))), Concatenation(Star(Literal('e')), Star(Literal('e'))))) == Concatenation(Star(Literal('e')), Star(Literal('e')))
+    # e*e? -> e*
+    assert opt(Concatenation(Star(), ZeroOrOne())) == Star()
+    # e?e* -> e*
+    assert opt(Concatenation(ZeroOrOne(), Star())) == Star()
+    # e1?(e1*e2) -> e1*e2
+    assert opt(Concatenation(ZeroOrOne(Literal('e')), Concatenation(Star(Literal('e')), Literal('f')))) == Concatenation(Star(Literal('e')), Literal('f'))
+    # e1*(e1?e2) -> e1*e2
+    assert opt(Concatenation(Star(Literal('e')), Concatenation(ZeroOrOne(Literal('e')), Literal('f')))) == Concatenation(Star(Literal('e')), Literal('f'))
+    # (e1e2*)e2? -> e1e2*
+    assert opt(Concatenation(Concatenation(Literal('f'), Star(Literal('e'))), ZeroOrOne(Literal('e')))) == Concatenation(Literal('f'), Star(Literal('e')))
+    # (e1e2?)e2* -> e1e2*
+    assert opt(Concatenation(Concatenation(Literal('f'), ZeroOrOne(Literal('e'))), Star(Literal('e')))) == Concatenation(Literal('f'), Star(Literal('e')))
+    # (e*e*)(e*e*) -> e*
+    assert opt(Concatenation(Concatenation(Star(Literal('e')), Star(Literal('e'))), Concatenation(Star(Literal('e')), Star(Literal('e'))))) == Star(Literal('e'))
 
 def test_opt_union():
     # e|e -> e
@@ -383,3 +395,13 @@ def test_opt_star():
     assert opt(Star(Concatenation(Star(Literal('e')), Literal('e')))) == Star(Literal('e'))
     # (e**)* -> e*
     assert opt(Star(Star(Star(Literal('e'))))) == Star(Literal('e'))
+
+def test_opt_optional():
+    # e?? -> e?
+    assert opt(ZeroOrOne(ZeroOrOne(Literal('e')))) == ZeroOrOne(Literal('e'))
+    # e*? -> e*
+    assert opt(ZeroOrOne(Star(Literal('e')))) == Star(Literal('e'))
+    # (ee*)? -> e*
+    assert opt(ZeroOrOne(Concatenation(Literal('e'), Star(Literal('e'))))) == Star(Literal('e'))
+    # (e*e)? -> e*
+    assert opt(ZeroOrOne(Concatenation(Star(Literal('e')), Literal('e')))) == Star(Literal('e'))

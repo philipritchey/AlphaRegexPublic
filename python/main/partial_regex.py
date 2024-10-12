@@ -101,6 +101,11 @@ class PartialRegexNode:
             if a.type == PartialRegexNodeType.LITERAL:
                 return f'{a}*'
             return f'({a})*'
+        if self.type == PartialRegexNodeType.OPTIONAL:
+            a = self.left
+            if a.type in (PartialRegexNodeType.CONCATENATION, PartialRegexNodeType.UNION):
+                return f'({a})?'
+            return f'{a}?'
         if self.type in (PartialRegexNodeType.EMPTY_STRING, PartialRegexNodeType.EMPTY_LANGUAGE):
             return str(self.type)
         return self.literal
@@ -156,6 +161,8 @@ class PartialRegexNode:
                     node.left = s.left
                     node.right = s.right
                     node.literal = s.literal
+                    if c.holes() == 0:
+                        return opt(c)
                     return c
                 i += 1
             if node.right:
@@ -282,117 +289,247 @@ def Star(s: PartialRegexNode = Hole()) -> PartialRegexNode:
     s1.left = s.copy()
     return s1
 
+def ZeroOrOne(s: PartialRegexNode = Hole()) -> PartialRegexNode:
+    s1 = PartialRegexNode(PartialRegexNodeType.OPTIONAL)
+    s1.left = s.copy()
+    return s1
+
 def opt(s: PartialRegexNode) -> PartialRegexNode:
     match s.type:
         case PartialRegexNodeType.CONCATENATION:
             # e1e2
-            e1 = s.left
-            e2 = s.right
+            e1 = opt(s.left)
+            e2 = opt(s.right)
+            if e1.type == PartialRegexNodeType.EMPTY_LANGUAGE or e2.type == PartialRegexNodeType.EMPTY_LANGUAGE:
+                # ∅e2 = e1∅ -> ∅
+                return EmptyLanguage()
+            if e1.type == PartialRegexNodeType.EMPTY_STRING:
+                # εe2 -> e2
+                return e2
+            if e2.type == PartialRegexNodeType.EMPTY_STRING:
+                # e1ε -> e1
+                return e1
             if e1.type == PartialRegexNodeType.STAR and e2.type == PartialRegexNodeType.STAR and e1.left == e2.left:
                 # e*e* -> e*
-                return Star(opt(e1))
+                return Star(e1.left)
+            if e1.type == PartialRegexNodeType.STAR and e2.type == PartialRegexNodeType.OPTIONAL and e1.left == e2.left:
+                # e*e? -> e*
+                return Star(e1.left)
+            if e1.type == PartialRegexNodeType.OPTIONAL and e2.type == PartialRegexNodeType.STAR and e1.left == e2.left:
+                # e?e* -> e*
+                return Star(e1.left)
             if e1.type == PartialRegexNodeType.CONCATENATION:
                 f1 = e1.left
                 f2 = e1.right
                 # (f1f2)e2
                 if f2.type == PartialRegexNodeType.STAR and e2.type == PartialRegexNodeType.STAR and f2.left == e2.left:
                     # (f1e*)e* ->f1e*
-                    return Concatenation(f1, Star(opt(e2.left)))
+                    return Concatenation(f1, Star(e2.left))
+                if f2.type == PartialRegexNodeType.OPTIONAL and e2.type == PartialRegexNodeType.STAR and f2.left == e2.left:
+                    # (f1e?)e* ->f1e*
+                    return Concatenation(f1, Star(e2.left))
+                if f2.type == PartialRegexNodeType.STAR and e2.type == PartialRegexNodeType.OPTIONAL and f2.left == e2.left:
+                    # (f1e*)e? ->f1e*
+                    return Concatenation(f1, Star(e2.left))
             if e2.type == PartialRegexNodeType.CONCATENATION:
                 f1 = e2.left
                 f2 = e2.right
                 # e1(f1f2)
                 if e1.type == PartialRegexNodeType.STAR and f1.type == PartialRegexNodeType.STAR and e1.left == f1.left:
                     # e*(e*f2) ->e*f2
-                    return Concatenation(Star(opt(e1.left)), f2)
-            return Concatenation(opt(e1), opt(e2))
+                    return Concatenation(Star(e1.left), f2)
+                if e1.type == PartialRegexNodeType.OPTIONAL and f1.type == PartialRegexNodeType.STAR and e1.left == f1.left:
+                    # e?(e*f2) ->e*f2
+                    return Concatenation(Star(e1.left), f2)
+                if e1.type == PartialRegexNodeType.STAR and f1.type == PartialRegexNodeType.OPTIONAL and e1.left == f1.left:
+                    # e*(e?f2) ->e*f2
+                    return Concatenation(Star(e1.left), f2)
+            return Concatenation(e1, e2)
 
         case PartialRegexNodeType.UNION:
             # e1|e2
-            e1 = s.left
-            e2 = s.right
+            e1 = opt(s.left)
+            e2 = opt(s.right)
+            if e1.type == PartialRegexNodeType.EMPTY_LANGUAGE:
+                # ∅|e2
+                return e2
+            if e2.type == PartialRegexNodeType.EMPTY_LANGUAGE:
+                # e1|∅
+                return e1
+            if e1.type == PartialRegexNodeType.EMPTY_STRING:
+                # ε|e2 -> e2?
+                return ZeroOrOne(e2)
+            if e2.type == PartialRegexNodeType.EMPTY_STRING:
+                # e1|ε -> e1?
+                return ZeroOrOne(e1)
             if e1 == e2:
                 # e|e -> e
-                return opt(e1)
+                return e1
             if e2.type == PartialRegexNodeType.STAR:
                 # e1|e2*
                 if e1 == e2.left:
                     # e|e* -> e*
-                    return Star(opt(e1))
+                    return Star(e1)
                 if e1.type == PartialRegexNodeType.UNION:
                     # (f1|f2)|e2*
                     f1 = e1.left
                     f2 = e1.right
                     if f1 == e2.left:
                         # (e2|f2)e2* -> f2|e2*
-                        return Union(opt(f2), Star(opt(e2.left)))
+                        return Union(f2, Star(e2.left))
                     if f2 == e2.left:
                         # (f1|e2)e2* -> f1|e2*
-                        return Union(opt(f1), Star(opt(e2.left)))
+                        return Union(f1, Star(e2.left))
+            if e2.type == PartialRegexNodeType.OPTIONAL:
+                # e1|e2?
+                if e1 == e2.left:
+                    # e|e? -> e?
+                    return ZeroOrOne(e1)
+                if e1.type == PartialRegexNodeType.UNION:
+                    # (f1|f2)|e2?
+                    f1 = e1.left
+                    f2 = e1.right
+                    if f1 == e2.left:
+                        # (e2|f2)e2? -> f2|e2?
+                        return Union(f2, ZeroOrOne(e2.left))
+                    if f2 == e2.left:
+                        # (f1|e2)e2? -> f1|e2?
+                        return Union(f1, ZeroOrOne(e2.left))
             if e1.type == PartialRegexNodeType.STAR:
                 # e1*|e2
                 if e1.left == e2:
                     # e*|e -> e*
-                    return Star(opt(e2))
+                    return Star(e2)
                 if e2.type == PartialRegexNodeType.UNION:
                     # e1*|(f1|f2)
                     f1 = e2.left
                     f2 = e2.right
                     if e1.left == f1:
                         # e1*|(e1|f2) -> e1*|f2
-                        return Union(Star(opt(e1.left)), opt(f2))
+                        return Union(Star(e1.left), f2)
                     if e1.left == f2:
                         # e1*|(f1|e1) -> e1*|f1
-                        return Union(Star(opt(e1.left)), opt(f1))
+                        return Union(Star(e1.left), f1)
+            if e1.type == PartialRegexNodeType.OPTIONAL:
+                # e1?|e2
+                if e1.left == e2:
+                    # e?|e -> e?
+                    return ZeroOrOne(e2)
+                if e2.type == PartialRegexNodeType.UNION:
+                    # e1?|(f1|f2)
+                    f1 = e2.left
+                    f2 = e2.right
+                    if e1.left == f1:
+                        # e1?|(e1|f2) -> e1?|f2
+                        return Union(ZeroOrOne(e1.left), f2)
+                    if e1.left == f2:
+                        # e1?|(f1|e1) -> e1?|f1
+                        return Union(ZeroOrOne(e1.left), f1)
             if e1.type == PartialRegexNodeType.UNION:
                 # (f1|f2)|e2
                 f1 = e1.left
                 f2 = e1.right
                 if f2.type == PartialRegexNodeType.STAR and f2.left == e2:
                     # (f1|e2*)|e2 -> f1|e2*
-                    return Union(opt(f1), Star(opt(e2)))
+                    return Union(f1, Star(e2))
                 if f1.type == PartialRegexNodeType.STAR and f1.left == e2:
                     # (e2*|f2)|e2 -> e2*|f2
-                    return Union(Star(opt(e2)), opt(f2))
+                    return Union(Star(e2), f2)
+                if f2.type == PartialRegexNodeType.OPTIONAL and f2.left == e2:
+                    # (f1|e2?)|e2 -> f1|e2?
+                    return Union(f1, ZeroOrOne(e2))
+                if f1.type == PartialRegexNodeType.OPTIONAL and f1.left == e2:
+                    # (e2?|f2)|e2 -> e2?|f2
+                    return Union(ZeroOrOne(e2), f2)
                 if e2 == f1:
                     # (e2|f2)|e2 -> e2|f2
-                    return Union(opt(e2), opt(f2))
+                    return Union(e2, f2)
                 if e2 == f2:
                     # (f1|e2)|e2 -> f1|e2
-                    return Union(opt(f1), opt(e2))
+                    return Union(f1, e2)
             if e2.type == PartialRegexNodeType.UNION:
                 # e1|(f1|f2)
                 f1 = e2.left
                 f2 = e2.right
                 if f2.type == PartialRegexNodeType.STAR and f2.left == e1:
                     # e1|(f1|e1*) -> f1|e1*
-                    return Union(opt(f1), Star(opt(e1)))
+                    return Union(f1, Star(e1))
                 if f1.type == PartialRegexNodeType.STAR and f1.left == e1:
                     # e1|(e1*|f2) -> e1*|f2
-                    return Union(Star(opt(e1)), opt(f2))
+                    return Union(Star(e1), f2)
+                if f2.type == PartialRegexNodeType.OPTIONAL and f2.left == e1:
+                    # e1|(f1|e1?) -> f1|e1?
+                    return Union(f1, ZeroOrOne(e1))
+                if f1.type == PartialRegexNodeType.OPTIONAL and f1.left == e1:
+                    # e1|(e1?|f2) -> e1?|f2
+                    return Union(ZeroOrOne(e1), f2)
                 if e1 == f1:
                     # e1|(e1|f2) -> e1|f2
-                    return Union(opt(e1), opt(f2))
+                    return Union(e1, f2)
                 if e1 == f2:
                     # e1|(f1|e1) -> e1|f1
-                    return Union(opt(e1), opt(f1))
-            return Union(opt(e1), opt(e2))
+                    return Union(e1, f1)
+            return Union(e1, e2)
 
         case PartialRegexNodeType.STAR:
             # e*
-            e = s.left
+            e = opt(s.left)
+            if e.type == PartialRegexNodeType.EMPTY_LANGUAGE:
+                # ∅* -> ∅
+                return EmptyLanguage()
+            if e.type == PartialRegexNodeType.EMPTY_STRING:
+                # ε* -> ε
+                return EmptyString()
             if e.type == PartialRegexNodeType.STAR:
                 # e** -> e*
-                return Star(opt(e.left))
+                return Star(e.left)
+            if e.type == PartialRegexNodeType.OPTIONAL:
+                # e?* -> e*
+                return Star(e.left)
             if e.type == PartialRegexNodeType.CONCATENATION:
                 # (e1e2)*
                 e1 = e.left
                 e2 = e.right
                 if e2.type == PartialRegexNodeType.STAR and e1 == e2.left:
-                    # ee* -> e*
-                    return Star(opt(e1))
+                    # (ee*)* -> e*
+                    return Star(e1)
                 if e1.type == PartialRegexNodeType.STAR and e1.left == e2:
-                    # e*e -> e*
-                    return Star(opt(e2))
-            return Star(opt(e))
+                    # (e*e)* -> e*
+                    return Star(e2)
+                if e1.type == PartialRegexNodeType.OPTIONAL and e1.left == e2:
+                    # (e?e)* -> e*
+                    return Star(e2)
+                if e2.type == PartialRegexNodeType.OPTIONAL and e2.left == e1:
+                    # (ee?)* -> e*
+                    return Star(e1)
+            return Star(e)
+
+        case PartialRegexNodeType.OPTIONAL:
+            # e?
+            e = opt(s.left)
+            if e.type == PartialRegexNodeType.EMPTY_LANGUAGE:
+                # ∅? -> ε
+                return EmptyString()
+            if e.type == PartialRegexNodeType.EMPTY_STRING:
+                # ε? -> ε
+                return EmptyString()
+            if e.type == PartialRegexNodeType.STAR:
+                # f*? -> f*
+                f = e.left
+                return Star(f)
+            if e.type == PartialRegexNodeType.OPTIONAL:
+                # f?? -> f?
+                f = e.left
+                return ZeroOrOne(f)
+            if e.type == PartialRegexNodeType.CONCATENATION:
+                # (e1e2)?
+                e1 = e.left
+                e2 = e.right
+                if e1.type == PartialRegexNodeType.STAR and e1.left == e2:
+                    # (e*e)? -> e*
+                    return Star(e2)
+                if e2.type == PartialRegexNodeType.STAR and e2.left == e1:
+                    # (ee*)? -> e*
+                    return Star(e1)
+            return ZeroOrOne(e)
     return s
