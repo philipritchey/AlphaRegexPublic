@@ -1,5 +1,5 @@
 import pytest
-from main.partial_regex import PartialRegexNode, PartialRegexNodeType, Literal, Union, Concatenation, Star, Hole, EmptyLanguage, EmptyString
+from main.partial_regex import PartialRegexNode, PartialRegexNodeType, Literal, Union, Concatenation, Star, Hole, EmptyLanguage, EmptyString, opt
 
 def test_concat_literals():
     s1 = Literal('a')
@@ -327,3 +327,57 @@ def test_split():
     assert EmptyString().split() == {EmptyString()}
     with pytest.raises(ValueError):
         PartialRegexNode(PartialRegexNodeType.OPTIONAL).split()
+
+def test_opt_concatenation():
+    # e*e* -> e*
+    assert opt(Concatenation(Star(Literal('e')), Star(Literal('e')))) == Star(Literal('e'))
+    # (fe*)e* -> fe*
+    assert opt(Concatenation(Concatenation(Literal('f'), Star(Literal('e'))), Star(Literal('e')))) == Concatenation(Literal('f'), Star(Literal('e')))
+    # e*(e*f) -> e*f
+    assert opt(Concatenation(Star(Literal('e')), Concatenation(Star(Literal('e')), Literal('f')))) == Concatenation(Star(Literal('e')), Literal('f'))
+    # (e*e*)(e*e*) -> e*e*
+    assert opt(Concatenation(Concatenation(Star(Literal('e')), Star(Literal('e'))), Concatenation(Star(Literal('e')), Star(Literal('e'))))) == Concatenation(Star(Literal('e')), Star(Literal('e')))
+
+def test_opt_union():
+    # e|e -> e
+    assert opt(Union(Literal('e'), Literal('e'))) == Literal('e')
+    # e|e* -> e*
+    assert opt(Union(Literal('e'), Star(Literal('e')))) == Star(Literal('e'))
+    # e*|e -> e*
+    assert opt(Union(Star(Literal('e')), Literal('e'))) == Star(Literal('e'))
+    # e|(e|f) -> e|f
+    assert opt(Union(Literal('e'), Union(Literal('e'), Literal('f')))) == Union(Literal('e'), Literal('f'))
+    # e|(f|e) -> e|f
+    assert opt(Union(Literal('e'), Union(Literal('f'), Literal('e')))) == Union(Literal('e'), Literal('f'))
+    # (e|f)|e -> e|f
+    assert opt(Union(Union(Literal('e'), Literal('f')), Literal('e'))) == Union(Literal('e'), Literal('f'))
+    # (f|e)|e -> f|e
+    assert opt(Union(Union(Literal('f'), Literal('e')), Literal('e'))) == Union(Literal('f'), Literal('e'))
+    # e*|(e|f) -> e*|f
+    assert opt(Union(Star(Literal('e')), Union(Literal('e'), Literal('f')))) == Union(Star(Literal('e')), Literal('f'))
+    # e*|(f|e) -> e*|f
+    assert opt(Union(Star(Literal('e')), Union(Literal('f'), Literal('e')))) == Union(Star(Literal('e')), Literal('f'))
+    # e|(e*|f) -> e*|f
+    assert opt(Union(Literal('e'), Union(Star(Literal('e')), Literal('f')))) == Union(Star(Literal('e')), Literal('f'))
+    # e|(f|e*) -> f|e*
+    assert opt(Union(Literal('e'), Union(Literal('f'), Star(Literal('e'))))) == Union(Literal('f'), Star(Literal('e')))
+    # (e|f)|e* -> f|e*
+    assert opt(Union(Union(Literal('e'), Literal('f')), Star(Literal('e')))) == Union(Literal('f'), Star(Literal('e')))
+    # (f|e)|e* -> f|e*
+    assert opt(Union(Union(Literal('f'), Literal('e')), Star(Literal('e')))) == Union(Literal('f'), Star(Literal('e')))
+    # (e*|f)|e -> e*|f
+    assert opt(Union(Union(Star(Literal('e')), Literal('f')), Literal('e'))) == Union(Star(Literal('e')), Literal('f'))
+    # (f|e*)|e -> f|e*
+    assert opt(Union(Union(Literal('f'), Star(Literal('e'))), Literal('e'))) == Union(Literal('f'), Star(Literal('e')))
+    # (e|e)|(e|e) -> e
+    assert opt(Union(Union(Literal('e'), Literal('e')), Union(Literal('e'), Literal('e')))) == Literal('e')
+
+def test_opt_star():
+    # e** -> e*
+    assert opt(Star(Star(Literal('e')))) == Star(Literal('e'))
+    # (ee*)* -> e*
+    assert opt(Star(Concatenation(Literal('e'), Star(Literal('e'))))) == Star(Literal('e'))
+    # (e*e)* -> e*
+    assert opt(Star(Concatenation(Star(Literal('e')), Literal('e')))) == Star(Literal('e'))
+    # (e**)* -> e*
+    assert opt(Star(Star(Star(Literal('e'))))) == Star(Literal('e'))
