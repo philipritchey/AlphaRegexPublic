@@ -77,4 +77,8 @@ def test_inflate():
     assert es == ['00', '01', '10', '11']
 
 def test_main():
-    main('tests/no4_begin_1_end_0')
+    main('../benchmarks/no1_start_with_0')
+    # main('../benchmarks/no2_end_with_01')
+    main('../benchmarks/no3_substring_0101')
+    # main('../benchmarks/no4_begin_1_end_0')
+    # main('../benchmarks/no5_length_at_least3_and_third_0')
