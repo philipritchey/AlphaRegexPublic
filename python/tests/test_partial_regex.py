@@ -437,3 +437,6 @@ def test_get_depth():
   assert Concatenation().get_depth() == 2
   assert Union().get_depth() == 2
   assert Literal('a').get_depth() == 1
+
+def test_overapproximation_of_optional():
+  assert ZeroOrOne().overapproximation() == ZeroOrOne(Star(Literal('.')))
