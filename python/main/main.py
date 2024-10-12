@@ -74,15 +74,9 @@ def dead(state: PartialRegexNode, P: set[str], N: set[str]) -> bool:
   o = state.overapproximation()
   s = opt(opt(o))
   overapproximation = str(s)
-  try:
-    if not matches_all(overapproximation, P):
-      # dead
-      return True
-  except re.error:
-    print('state:', repr(state))
-    print('o', repr(o))
-    print('s', repr(s))
-    raise
+  if not matches_all(overapproximation, P):
+    # dead
+    return True
 
   u = state.underapproximation()
   s = opt(opt(u))
