@@ -6,14 +6,8 @@ from main.partial_regex import PartialRegexNode, Hole, opt
 
 def matches_all(pattern: str, examples: set[str]) -> bool:
   for example in examples:
-    try:
-      if not re.fullmatch(pattern, example):
-        return False
-    except re.error as err:
-      print(f'[FATAL] {err}')
-      print(f'[DEBUG] {pattern=}')
-      print(f'[DEBUG] {example=}')
-      raise
+    if not re.fullmatch(pattern, example):
+      return False
   return True
 
 def matches_any(pattern: str, examples: set[str]) -> bool:
