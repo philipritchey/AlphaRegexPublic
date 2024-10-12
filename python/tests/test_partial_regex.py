@@ -123,49 +123,49 @@ def test_concatentation_with_empty_string_to_string():
     s1 = Literal('a')
     s2 = EmptyString()
     s3 = s1 * s2
-    assert str(s3) == 'a'
+    assert str(opt(s3)) == 'a'
     s4 = s2 * s1
-    assert str(s4) == 'a'
+    assert str(opt(s4)) == 'a'
 
 def test_concatentation_with_empty_language_to_string():
     s1 = Literal('a')
     s2 = EmptyLanguage()
     s3 = s1 * s2
-    assert str(s3) == str(PartialRegexNodeType.EMPTY_LANGUAGE)
+    assert str(opt(s3)) == str(PartialRegexNodeType.EMPTY_LANGUAGE)
     s4 = s2 * s1
-    assert str(s4) == str(PartialRegexNodeType.EMPTY_LANGUAGE)
+    assert str(opt(s4)) == str(PartialRegexNodeType.EMPTY_LANGUAGE)
 
 def test_union_with_empty_string_to_string():
     s1 = Literal('a')
     s2 = EmptyString()
     s3 = s1 + s2
-    assert str(s3) == 'a?'
+    assert str(opt(s3)) == 'a?'
     s4 = s2 + s1
-    assert str(s4) == 'a?'
+    assert str(opt(s4)) == 'a?'
 
 def test_union_with_empty_string_to_string_2():
     s1 = Literal('a') * Literal('b')
     s2 = EmptyString()
     s3 = s1 + s2
-    assert str(s3) == '(ab)?'
+    assert str(opt(s3)) == '(ab)?'
     s4 = s2 + s1
-    assert str(s4) == '(ab)?'
+    assert str(opt(s4)) == '(ab)?'
 
 def test_union_with_empty_language_to_string():
     s1 = Literal('a')
     s2 = EmptyLanguage()
     s3 = s1 + s2
-    assert str(s3) == 'a'
+    assert str(opt(s3)) == 'a'
     s4 = s2 + s1
-    assert str(s4) == 'a'
+    assert str(opt(s4)) == 'a'
 
 def test_union_with_empty_langauge_to_string_2():
     s1 = Literal('a') * Literal('b')
     s2 = EmptyLanguage()
     s3 = s1 + s2
-    assert str(s3) == 'ab'
+    assert str(opt(s3)) == 'ab'
     s4 = s2 + s1
-    assert str(s4) == 'ab'
+    assert str(opt(s4)) == 'ab'
 
 def test_empty_string_to_string():
     assert str(EmptyString()) == str(PartialRegexNodeType.EMPTY_STRING)
@@ -176,22 +176,22 @@ def test_empty_language_to_string():
 def test_empty_string_star_to_string():
     s = Star()
     s.left = EmptyString()
-    assert str(s) == str(PartialRegexNodeType.EMPTY_STRING)
+    assert str(opt(s)) == str(PartialRegexNodeType.EMPTY_STRING)
 
 def test_empty_language_star_to_string():
     s = Star()
     s.left = EmptyLanguage()
-    assert str(s) == str(PartialRegexNodeType.EMPTY_LANGUAGE)
+    assert str(opt(s)) == str(PartialRegexNodeType.EMPTY_LANGUAGE)
 
 def test_repstar_to_string():
     s = Star()
     s.left = Star()
     s.left.left = Literal('a')
-    assert str(s) == 'a*'
+    assert str(opt(s)) == 'a*'
 
     s.left.left = Star()
     s.left.left.left = Literal('a')
-    assert str(s) == 'a*'
+    assert str(opt(s)) == 'a*'
 
 def test_count_holes():
     s = ((Hole() * Hole()) + (Hole() * Hole())) + (Literal('a') * (Literal('b') + Hole()))
@@ -276,7 +276,7 @@ def test_underapproximation():
     assert dot_star.underapproximation() == dot_star
 
 def test_approximations_with_unknown_type():
-    s = PartialRegexNode(PartialRegexNodeType.OPTIONAL)
+    s = PartialRegexNode(PartialRegexNodeType.PLUS)
     with pytest.raises(ValueError):
         s.overapproximation()
     with pytest.raises(ValueError):
@@ -286,13 +286,13 @@ def test_hash():
     s1 = EmptyString()
     s2 = Star()
     s2.left = EmptyString()
-    assert hash(s1) == hash(s2)
+    assert hash(s1) == hash(opt(s2))
 
 def test_eq():
     s1 = EmptyString()
     s2 = Star()
     s2.left = EmptyString()
-    assert s1 == s2
+    assert s1 == opt(s2)
 
 def test_split_of_unroll():
     state = Union(Literal('1'), Hole())

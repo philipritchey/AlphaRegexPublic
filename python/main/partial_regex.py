@@ -110,21 +110,38 @@ class PartialRegexNode:
             return str(self.type)
         return self.literal
 
-    def cost(self) -> int:
-        c_literal = 1
-        c_concatenation = 2
-        c_star = 3
-        c_union = 20
+    def get_cost(self) -> int:
+        c_literal = 20
+        c_concatenation = 5
+        c_star = 20
+        c_optional = 20
+        c_union = 30
         c_hole = 100
         if self.type == PartialRegexNodeType.HOLE:
             return c_hole
         if self.type == PartialRegexNodeType.STAR:
             return self.left.cost() + c_star
+        if self.type == PartialRegexNodeType.OPTIONAL:
+            return self.left.cost() + c_optional
         if self.type == PartialRegexNodeType.CONCATENATION:
             return self.left.cost() + self.right.cost() + c_concatenation
         if self.type == PartialRegexNodeType.UNION:
             return self.left.cost() + self.right.cost() + c_union
         return c_literal
+
+    def get_depth(self):
+        match self.type:
+            case PartialRegexNodeType.HOLE:
+                return 1
+            case PartialRegexNodeType.STAR | PartialRegexNodeType.OPTIONAL:
+                return self.left.get_depth() + 1
+            case PartialRegexNodeType.CONCATENATION | PartialRegexNodeType.UNION:
+                return max(self.left.get_depth(), self.right.get_depth())
+        return 1
+
+    def cost(self) -> int:
+        return self.get_cost() + int(10 ** (self.get_depth() - 2))
+
 
     def copy(self) -> Self:
         s = PartialRegexNode(self.type, self.literal)
@@ -197,6 +214,8 @@ class PartialRegexNode:
             return self.left.overapproximation() * self.right.overapproximation()
         if self.type == PartialRegexNodeType.STAR:
             return Star(self.left.overapproximation())
+        if self.type == PartialRegexNodeType.OPTIONAL:
+            return ZeroOrOne(self.left.overapproximation())
         if self.type == PartialRegexNodeType.HOLE:
             return Star(Literal('.'))
         raise ValueError(f'unknown type: {self.type}')
@@ -214,6 +233,8 @@ class PartialRegexNode:
             return self.left.underapproximation() * self.right.underapproximation()
         if self.type == PartialRegexNodeType.STAR:
             return Star(self.left.underapproximation())
+        if self.type == PartialRegexNodeType.OPTIONAL:
+            return ZeroOrOne(self.left.underapproximation())
         if self.type == PartialRegexNodeType.HOLE:
             return EmptyLanguage()
         raise ValueError(f'unknown type: {self.type}')
@@ -496,6 +517,12 @@ def opt(s: PartialRegexNode) -> PartialRegexNode:
                 if e1.type == PartialRegexNodeType.STAR and e1.left == e2:
                     # (e*e)* -> e*
                     return Star(e2)
+                if e1.type == PartialRegexNodeType.STAR and e2.type == PartialRegexNodeType.STAR:
+                    # (e*f*)* -> (e|f)*
+                    return Star(Union(e1.left, e2.left))
+                if e1.type == PartialRegexNodeType.OPTIONAL and e2.type == PartialRegexNodeType.OPTIONAL:
+                    # (e?f?)* -> (e|f)*
+                    return Star(Union(e1.left, e2.left))
                 if e1.type == PartialRegexNodeType.OPTIONAL and e1.left == e2:
                     # (e?e)* -> e*
                     return Star(e2)
@@ -531,5 +558,11 @@ def opt(s: PartialRegexNode) -> PartialRegexNode:
                 if e2.type == PartialRegexNodeType.STAR and e2.left == e1:
                     # (ee*)? -> e*
                     return Star(e1)
+                if e1.type == PartialRegexNodeType.STAR and e2.type == PartialRegexNodeType.STAR:
+                    # (e*f*)? -> e*f*
+                    return Concatenation(Star(e1), Star(e2))
+                if e1.type == PartialRegexNodeType.OPTIONAL and e2.type == PartialRegexNodeType.OPTIONAL:
+                    # (e?f?)? -> e?f?
+                    return Concatenation(ZeroOrOne(e1), ZeroOrOne(e2))
             return ZeroOrOne(e)
     return s
