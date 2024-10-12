@@ -564,9 +564,9 @@ def opt(s: PartialRegexNode) -> PartialRegexNode:
           return Star(e1)
         if e1.type == PartialRegexNodeType.STAR and e2.type == PartialRegexNodeType.STAR:
           # (e*f*)? -> e*f*
-          return Concatenation(Star(e1), Star(e2))
+          return Concatenation(e1, e2)
         if e1.type == PartialRegexNodeType.OPTIONAL and e2.type == PartialRegexNodeType.OPTIONAL:
           # (e?f?)? -> e?f?
-          return Concatenation(ZeroOrOne(e1), ZeroOrOne(e2))
+          return Concatenation(e1, e2)
       return ZeroOrOne(e)
   return s

@@ -424,6 +424,14 @@ def test_opt_star():
   assert opt(Star(Concatenation(Star(Literal('e')), Literal('e')))) == Star(Literal('e'))
   # (e**)* -> e*
   assert opt(Star(Star(Star(Literal('e'))))) == Star(Literal('e'))
+  # e?* -> e*
+  assert opt(Star(ZeroOrOne(Literal('e')))) == Star(Literal('e'))
+  # (e?f?)* -> (e|f)*
+  assert opt(Star(Concatenation(ZeroOrOne(Literal('e')), ZeroOrOne(Literal('f'))))) == Star(Union(Literal('e'), Literal('f')))
+  # (e?e)* -> e*
+  assert opt(Star(Concatenation(ZeroOrOne(Literal('e')), Literal('e')))) == Star(Literal('e'))
+  # (ee?)* -> e*
+  assert opt(Star(Concatenation(Literal('e'), ZeroOrOne(Literal('e'))))) == Star(Literal('e'))
 
 def test_opt_optional():
   # e?? -> e?
@@ -434,6 +442,14 @@ def test_opt_optional():
   assert opt(ZeroOrOne(Concatenation(Literal('e'), Star(Literal('e'))))) == Star(Literal('e'))
   # (e*e)? -> e*
   assert opt(ZeroOrOne(Concatenation(Star(Literal('e')), Literal('e')))) == Star(Literal('e'))
+  # ∅? -> ε
+  assert opt(ZeroOrOne(EmptyLanguage())) == EmptyString()
+  # ε? -> ε
+  assert opt(ZeroOrOne(EmptyString())) == EmptyString()
+  # (e*f*)? -> e*f*
+  assert opt(ZeroOrOne(Concatenation(Star(Literal('e')), Star(Literal('f'))))) == Concatenation(Star(Literal('e')), Star(Literal('f')))
+  # (e?f?)? -> e?f?
+  assert opt(ZeroOrOne(Concatenation(ZeroOrOne(Literal('e')), ZeroOrOne(Literal('f'))))) == Concatenation(ZeroOrOne(Literal('e')), ZeroOrOne(Literal('f')))
 
 def test_opt_multiple_repeat():
   state = Concatenation(Literal('.'), Union(EmptyString(), Union(EmptyString(), Hole())))
