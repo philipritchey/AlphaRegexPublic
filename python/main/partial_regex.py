@@ -238,8 +238,8 @@ class PartialRegexNode:
           node.left = s.left
           node.right = s.right
           node.literal = s.literal
-          if c.holes() == 0:
-            return opt(c)
+          # if c.holes() == 0:
+          #   return opt(c)
           return c
         i += 1
       if node.right:
@@ -403,14 +403,14 @@ class PartialRegexNode:
     '''
     # check for deadness
     o = self.overapproximation()
-    s = opt(opt(o))
+    s = o #opt(opt(o))
     overapproximation = str(s)
     if not matches_all(overapproximation, P):
       # dead
       return True
 
     u = self.underapproximation()
-    s = opt(opt(u))
+    s = u #opt(opt(u))
     underapproximation = str(s)
     if matches_any(underapproximation, N):
       # dead
@@ -419,7 +419,8 @@ class PartialRegexNode:
     # redundant states
     A = self.unroll().split()
     for e in A:
-      overapproximation = opt(opt(e.overapproximation()))
+      o = e.overapproximation()
+      overapproximation = o #opt(opt(o))
       if not matches_any(str(overapproximation), P):
         # dead
         return True
