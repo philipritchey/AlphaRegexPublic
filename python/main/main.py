@@ -1,11 +1,23 @@
+'''
+main
+'''
 import sys
 from time import time
 from main.search import search
 
 def main(examples: str) -> None:
+  '''
+  the entry point of the program
+
+  Args:
+      examples (str): path to file containing positive and negative examples.
+                      first line is description of language.
+                      "++" on a line begins positive exmaples.
+                      "--" on a line begins negatvie examples.
+  '''
   P: set[str] = set()
   N: set[str] = set()
-  with open(examples, 'r') as f:
+  with open(examples, 'r', encoding="utf-8") as f:
     description = f.readline().strip()
     active_set = P
     for line in f:

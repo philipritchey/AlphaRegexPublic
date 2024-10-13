@@ -1,3 +1,6 @@
+'''
+tests for partial_regex.py
+'''
 import pytest
 from main.partial_regex import PartialRegexNode, PartialRegexNodeType, Literal, Union, Concatenation, Star, Hole, EmptyLanguage, EmptyString, opt, ZeroOrOne
 

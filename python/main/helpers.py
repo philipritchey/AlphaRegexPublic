@@ -1,25 +1,39 @@
+'''
+helpers
+'''
 import re
 
 def matches_all(pattern: str, examples: set[str]) -> bool:
+  '''
+  checks whether the pattern matches ALL examples
+
+  Args:
+      pattern (str): pattern to test
+      examples (set[str]): examples to test against
+
+  Returns:
+      bool: True iff the pattern matches ALL examples
+  '''
   for example in examples:
     if not re.fullmatch(pattern, example):
       return False
   return True
 
 def matches_any(pattern: str, examples: set[str]) -> bool:
+  '''
+  checks whether the pattern matches any example
+
+  Args:
+      pattern (str): the pattern to test
+      examples (set[str]): the examples to test against
+
+  Returns:
+      bool: True iff the pattern matches SOME example
+  '''
   for example in examples:
     if re.fullmatch(pattern, example):
       return True
   return False
-
-def get_literals(examples: set[str]) -> str:
-  literals = 'X.'
-  for example in examples:
-    for symbol in example:
-      if symbol not in literals:
-        literals += symbol
-  # 'X' is same thing as '.', so exclude it
-  return literals[1:]
 
 def inflate(example: str, alphabet: str) -> list[str]:
   '''

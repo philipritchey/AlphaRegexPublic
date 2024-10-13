@@ -1,6 +1,13 @@
+'''
+tests for main.py
+'''
+
 from main.main import main
 
 def test_main():
+  '''
+  tests for main
+  '''
   main('../benchmarks/no01_start_with_0')
   # main('../benchmarks/no02_end_with_01')
   # main('../benchmarks/no03_substring_0101')

@@ -1,43 +1,21 @@
+'''
+Interactive Main
+'''
 import heapq
 from main.partial_regex import PartialRegexNode, Hole
-from main.main import matches_all, matches_any, inflate_all
-from typing import Set, List
+from main.helpers import matches_all, matches_any, inflate_all
 
-def dead(state: PartialRegexNode, P: Set[str], N: Set[str]) -> bool:
-  # check for deadness
-  overapproximation = str(state.overapproximation())
-  print(f'  over={overapproximation}')
-  if not matches_all(overapproximation, P):
-    # dead
-    return True
-
-  underapproximation = str(state.underapproximation())
-  print(f'  under={underapproximation}')
-  if matches_any(underapproximation, N):
-    # dead
-    return True
-
-  # redundant states
-  A = state.unroll().split()
-  for e in A:
-    overapproximation = e.overapproximation()
-    print(f'  e^={overapproximation}')
-    if not matches_any(str(overapproximation), P):
-      # dead
-      return True
-  return False
-
-def interactive_search(P: Set[str], N: Set[str], alphabet: str = '01', **kwargs) -> str:
+def interactive_search(P: set[str], N: set[str], alphabet: str = '01', **kwargs) -> str:
   pause = kwargs['pause'] if 'pause' in kwargs else True
   verbose = kwargs['verbose'] if 'verbose' in kwargs else True
   initial = kwargs['initial'] if 'initial' in kwargs else Hole()
   N = inflate_all(N, alphabet)
   print(f'{N=}')
-  q: List[PartialRegexNode] = []
+  q: list[PartialRegexNode] = []
   heapq.heappush(q, initial)
-  v_pre = set()
-  v_post = set()
-  steps = 0
+  v_pre: set[PartialRegexNode] = set()
+  v_post: set[PartialRegexNode] = set()
+  steps: int = 0
   while True:
     if pause:
       input('Press enter to continue...')
@@ -56,7 +34,7 @@ def interactive_search(P: Set[str], N: Set[str], alphabet: str = '01', **kwargs)
         print(f'  checking /{pattern}/')
       if matches_all(pattern, P) and not matches_any(pattern, N):
         if verbose:
-          print(f'  PASS')
+          print('  PASS')
         return pattern
       if verbose:
         print('  FAIL')

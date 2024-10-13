@@ -1,4 +1,8 @@
-from main.helpers import matches_all, matches_any, get_literals, inflate
+'''
+test helpers
+'''
+
+from main.helpers import matches_all, matches_any, inflate
 
 def test_matches_all():
   examples = {'0', '00', '01', '001'}
@@ -11,11 +15,6 @@ def test_matches_any():
   examples = {'0', '00', '01', '001'}
   assert matches_any('00', examples)
   assert not matches_any('10', examples)
-
-
-def test_get_literals():
-  examples = {'0', '00', '01', '001'}
-  assert get_literals(examples) == '.01'
 
 def test_inflate():
   e = 'X'

@@ -1,3 +1,6 @@
+'''
+tests for search.py
+'''
 from main.search import search
 
 def test_search_starts_with_0():
