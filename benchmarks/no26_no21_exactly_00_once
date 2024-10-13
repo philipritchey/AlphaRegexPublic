@@ -1,0 +1,14 @@
+w has exactly one pair of consecutive 0s. (with more complete examples)
+++
+00
+1001
+010010
+1011001110
+--
+01
+11
+000
+00100
+X000
+1100011
+1011000
