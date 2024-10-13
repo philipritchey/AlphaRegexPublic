@@ -2,7 +2,7 @@
 tests for partial_regex.py
 '''
 import pytest
-from main.partial_regex import PartialRegexNode, PartialRegexNodeType, Literal, Union, Concatenation, Star, Hole, EmptyLanguage, EmptyString, opt, ZeroOrOne
+from main.partial_regex import PartialRegexNode, PartialRegexNodeType, Literal, Union, Concatenation, Star, Hole, EmptyLanguage, EmptyString, opt, ZeroOrOne, opt_concatentation, opt_optional, opt_star, opt_union
 
 def test_concat_literals():
   s1 = Literal('a')
@@ -509,3 +509,10 @@ def test_star_of_concat_stars_to_string():
   # (e*f*)* -> (e|f)*
   state = Star(Concatenation(Star(Literal('e')), Star(Literal('f'))))
   assert str(state) == '(e|f)*'
+
+def test_opt_helpers_type_guard():
+  state = Literal('a')
+  assert opt_concatentation(state) == state
+  assert opt_optional(state) == state
+  assert opt_star(state) == state
+  assert opt_union(state) == state
