@@ -14,7 +14,6 @@ def matches_all(pattern: str, examples: set[str]) -> bool:
   Returns:
       bool: True iff the pattern matches ALL examples
   '''
-  pattern = pattern.replace('*??', '*')
   for example in examples:
     if not re.fullmatch(pattern, example):
       return False
@@ -31,7 +30,6 @@ def matches_any(pattern: str, examples: set[str]) -> bool:
   Returns:
       bool: True iff the pattern matches SOME example
   '''
-  pattern = pattern.replace('*??', '*')
   for example in examples:
     if re.fullmatch(pattern, example):
       return True
