@@ -403,14 +403,17 @@ class PartialRegexNode:
     '''
     # check for deadness
     o = self.overapproximation()
-    s = o #opt(opt(o))
+    s = opt(o)
     overapproximation = str(s)
+    # if overapproximation == '..*??':
+    #   print(f'[DEBUG] state={repr(o)}')
+    #   raise ValueError('WTF!?')
     if not matches_all(overapproximation, P):
       # dead
       return True
 
     u = self.underapproximation()
-    s = u #opt(opt(u))
+    s = opt(u)
     underapproximation = str(s)
     if matches_any(underapproximation, N):
       # dead
@@ -420,8 +423,9 @@ class PartialRegexNode:
     A = self.unroll().split()
     for e in A:
       o = e.overapproximation()
-      overapproximation = o #opt(opt(o))
-      if not matches_any(str(overapproximation), P):
+      overapproximation = opt(o)
+      pattern = str(overapproximation)
+      if not matches_any(pattern, P):
         # dead
         return True
     return False
@@ -439,7 +443,7 @@ class PartialRegexNode:
     '''
     if self.holes() > 0:
       return False
-    pattern = str(opt(self))
+    pattern = str(opt((self)))
     return matches_all(pattern, P) and not matches_any(pattern, N)
 
 def Literal(symbol: str) -> PartialRegexNode:
@@ -649,10 +653,10 @@ def opt_union(s: PartialRegexNode) -> PartialRegexNode:
     return e1
   if e1.type == PartialRegexNodeType.EMPTY_STRING:
     # ε|e2 -> e2?
-    return ZeroOrOne(e2)
+    return opt(ZeroOrOne(e2))
   if e2.type == PartialRegexNodeType.EMPTY_STRING:
     # e1|ε -> e1?
-    return ZeroOrOne(e1)
+    return opt(ZeroOrOne(e1))
   if e1 == e2:
     # e|e -> e
     return e1

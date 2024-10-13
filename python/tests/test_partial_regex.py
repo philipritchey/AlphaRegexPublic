@@ -467,7 +467,7 @@ def test_opt_optional():
 def test_opt_multiple_repeat():
   state = Concatenation(Literal('.'), Union(EmptyString(), Union(EmptyString(), Hole())))
   overapproximation = state.overapproximation()
-  opt2_overapproximation = opt(opt(overapproximation))
+  opt2_overapproximation = opt(overapproximation)
   assert str(opt2_overapproximation) == '..*'
 
 def test_empty_union_concat_to_str():
@@ -516,3 +516,8 @@ def test_opt_helpers_type_guard():
   assert opt_optional(state) == state
   assert opt_star(state) == state
   assert opt_union(state) == state
+
+def test_opt_causing_multiple_repeat():
+  state = Concatenation(Literal('.'), Union(EmptyString(), Union(EmptyString(), Star(Literal('.')))))
+  o = opt(state)
+  assert o == Concatenation(Literal('.'), Star(Literal('.')))
