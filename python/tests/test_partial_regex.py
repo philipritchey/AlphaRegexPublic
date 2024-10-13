@@ -521,3 +521,10 @@ def test_opt_causing_multiple_repeat():
   state = Concatenation(Literal('.'), Union(EmptyString(), Union(EmptyString(), Star(Literal('.')))))
   o = opt(state)
   assert o == Concatenation(Literal('.'), Star(Literal('.')))
+
+def test_cost_of_21():
+  # solution to no21 in the paper: (0?1)*00(10?)*
+  state1 = Star(ZeroOrOne(Literal('0')) * Literal('1')) * Literal('0') * Literal('0') * Star(Literal('1') * ZeroOrOne(Literal('0')))
+  # solution my code found with same examples: (.(...|0))*
+  state2 = Star(Literal('.') * Union(Literal('.') * Literal('.') * Literal('.'), Literal('0')))
+  assert state2.cost() <= state1.cost()
