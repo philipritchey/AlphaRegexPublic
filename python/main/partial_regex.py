@@ -213,6 +213,53 @@ class PartialRegexNode:
           q.append(node.left)
     return cnt
 
+  def next_states(self, literals: str) -> list[Self]:
+    states = []
+    c = self.copy()
+    q = [c]
+    while len(q) > 0:
+      node = q.pop()
+      if node.type == PartialRegexNodeType.HOLE:
+        node._cost = -1
+        node.type = PartialRegexNodeType.LITERAL
+        node.left = None
+        node.right = None
+        for literal in literals + '.':
+          node.literal = literal
+          states.append(c.copy())
+        
+        node.literal = None
+
+        node.type = PartialRegexNodeType.EMPTY_STRING
+        states.append(c.copy())
+        
+        node.type = PartialRegexNodeType.EMPTY_LANGUAGE
+        states.append(c.copy())
+
+        node.left = Hole()
+
+        node.type = PartialRegexNodeType.STAR
+        states.append(c.copy())
+
+        node.right = Hole()
+
+        node.type = PartialRegexNodeType.CONCATENATION
+        states.append(c.copy())
+
+        node.type = PartialRegexNodeType.UNION
+        states.append(c.copy())
+
+        node.type = PartialRegexNodeType.HOLE
+        node.left = None
+        node.right = None
+        node.literal = None
+      elif node.left:
+        q.append(node.left)
+        if node.right:
+          q.append(node.right)
+    return states
+
+  # TODO(pcr): combine fill and next_states to avoid n+1 traversal problem
   def fill(self, s: Self, index: int = 0) -> Self:
     '''
     fill a hole with the specifed expression
@@ -248,7 +295,7 @@ class PartialRegexNode:
         q.append(node.left)
     raise ValueError('no hole filled')
 
-  def next_states(self, literals: str) -> list[Self]:
+  def next_states_old(self, literals: str) -> list[Self]:
     '''
     the list of next states (nodes/expressions) from here
 
