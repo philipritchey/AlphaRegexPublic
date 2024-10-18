@@ -259,64 +259,6 @@ class PartialRegexNode:
           q.append(node.right)
     return states
 
-  # TODO(pcr): combine fill and next_states to avoid n+1 traversal problem
-  def fill(self, s: Self, index: int = 0) -> Self:
-    '''
-    fill a hole with the specifed expression
-
-    Args:
-        s (Self): expression to put in the hole
-        index (int, optional): index of hole to fill. Defaults to 0.
-
-    Raises:
-        ValueError: no hole available to fill.
-
-    Returns:
-        Self: a copy of this node, but with the hole filled
-    '''
-    c = self.copy()
-    q = [c]
-    i = 0
-    while len(q) > 0:
-      node = q.pop()
-      if node.type == PartialRegexNodeType.HOLE:
-        if i == index:
-          node.type = s.type
-          node.left = s.left
-          node.right = s.right
-          node.literal = s.literal
-          # if c.holes() == 0:
-          #   return opt(c)
-          return c
-        i += 1
-      if node.right:
-        q.append(node.right)
-      if node.left:
-        q.append(node.left)
-    raise ValueError('no hole filled')
-
-  def next_states_old(self, literals: str) -> list[Self]:
-    '''
-    the list of next states (nodes/expressions) from here
-
-    Args:
-        literals (str): the input alphabet
-
-    Returns:
-        list[Self]: the children of this node/expression
-    '''
-    states = []
-    holes = self.holes()
-    for hole in range(holes):
-      for literal in literals + '.':
-        states.append(self.fill(Literal(literal), hole))
-      states.append(self.fill(EmptyString(), hole))
-      states.append(self.fill(EmptyLanguage(), hole))
-      states.append(self.fill(Concatenation(), hole))
-      states.append(self.fill(Union(), hole))
-      states.append(self.fill(Star(), hole))
-    return states
-
   def overapproximation(self) -> Self:
     '''
     fill holes with .*
