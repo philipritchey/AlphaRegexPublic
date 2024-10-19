@@ -1,15 +1,6 @@
 #!/usr/bin/bash
 
-if which python3.12; then
-    PYTHON="python3.12"
-elif which python3.11; then
-    PYTHON="python3.11"
-else
-    echo "requires Python >= 3.11"
-    exit 1
-fi
-
-if $PYTHON -m pytest --cov-config=.coveragerc --cov-report term-missing --cov=main tests/; then
+if python3 -m pytest --cov-config=.coveragerc --cov-report term-missing --cov=main tests/; then
     git add .
     git commit -m "autocommit: passing all tests with >= 90% coverage"
 fi
