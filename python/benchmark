@@ -15,7 +15,10 @@ selector="*"
 while getopts "ht:o:-:" opt; do
   case $opt in
     t) timelimit=${OPTARG};;
-    o) selector="${OPTARG}*";;
+    o)
+      number=$(printf "%02d" ${OPTARG})
+      selector="no${number}*"
+      ;;
     h) usage;;
     -)
     case "${OPTARG}" in
@@ -26,10 +29,14 @@ while getopts "ht:o:-:" opt; do
   esac
 done
 
-cnt=1
-for file in $(ls "../benchmarks/${selector}"); do
-  printf "%2d | " $cnt
-  if ! timeout $timelimit python3 -m main.main $file; then
+if [ "${selector}" = "*" ]; then
+  cnt=1
+else
+  cnt=$((number))
+fi
+for file in $(ls ../benchmarks/${selector}); do
+  printf "%2d | " ${cnt}
+  if ! timeout ${timelimit} python3 -m main.main ${file}; then
     echo "X | TIMEOUT"
   fi
   (( cnt++ ))
