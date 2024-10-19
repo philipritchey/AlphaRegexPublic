@@ -213,61 +213,50 @@ class PartialRegexNode:
           q.append(node.left)
     return cnt
 
-  def fill(self, s: Self, index: int = 0) -> Self:
-    '''
-    fill a hole with the specifed expression
-
-    Args:
-        s (Self): expression to put in the hole
-        index (int, optional): index of hole to fill. Defaults to 0.
-
-    Raises:
-        ValueError: no hole available to fill.
-
-    Returns:
-        Self: a copy of this node, but with the hole filled
-    '''
+  def next_states(self, literals: str) -> list[Self]:
+    states = []
     c = self.copy()
     q = [c]
-    i = 0
     while len(q) > 0:
       node = q.pop()
       if node.type == PartialRegexNodeType.HOLE:
-        if i == index:
-          node.type = s.type
-          node.left = s.left
-          node.right = s.right
-          node.literal = s.literal
-          # if c.holes() == 0:
-          #   return opt(c)
-          return c
-        i += 1
-      if node.right:
-        q.append(node.right)
-      if node.left:
+        node._cost = -1
+        node.type = PartialRegexNodeType.LITERAL
+        node.left = None
+        node.right = None
+        for literal in literals + '.':
+          node.literal = literal
+          states.append(c.copy())
+        
+        node.literal = None
+
+        node.type = PartialRegexNodeType.EMPTY_STRING
+        states.append(c.copy())
+        
+        node.type = PartialRegexNodeType.EMPTY_LANGUAGE
+        states.append(c.copy())
+
+        node.left = Hole()
+
+        node.type = PartialRegexNodeType.STAR
+        states.append(c.copy())
+
+        node.right = Hole()
+
+        node.type = PartialRegexNodeType.CONCATENATION
+        states.append(c.copy())
+
+        node.type = PartialRegexNodeType.UNION
+        states.append(c.copy())
+
+        node.type = PartialRegexNodeType.HOLE
+        node.left = None
+        node.right = None
+        node.literal = None
+      elif node.left:
         q.append(node.left)
-    raise ValueError('no hole filled')
-
-  def next_states(self, literals: str) -> list[Self]:
-    '''
-    the list of next states (nodes/expressions) from here
-
-    Args:
-        literals (str): the input alphabet
-
-    Returns:
-        list[Self]: the children of this node/expression
-    '''
-    states = []
-    holes = self.holes()
-    for hole in range(holes):
-      for literal in literals + '.':
-        states.append(self.fill(Literal(literal), hole))
-      states.append(self.fill(EmptyString(), hole))
-      states.append(self.fill(EmptyLanguage(), hole))
-      states.append(self.fill(Concatenation(), hole))
-      states.append(self.fill(Union(), hole))
-      states.append(self.fill(Star(), hole))
+        if node.right:
+          q.append(node.right)
     return states
 
   def overapproximation(self) -> Self:

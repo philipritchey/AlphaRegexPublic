@@ -28,62 +28,6 @@ def test_copy():
   assert s2.left is None
   assert s2.right is None
 
-def test_fill_hole():
-  hole = Hole()
-  s1 = Literal('a')
-  s2 = hole.fill(s1)
-  assert s2.type == PartialRegexNodeType.LITERAL
-
-def test_fill_hole_2():
-  hole = Hole()
-  s1 = Literal('a') * hole
-  s2 = s1.fill(Literal('b'))
-  assert s2.type == PartialRegexNodeType.CONCATENATION
-  assert s2.left.type == PartialRegexNodeType.LITERAL
-  assert s2.left.literal == 'a'
-  assert s2.right.type == PartialRegexNodeType.LITERAL
-  assert s2.right.literal == 'b'
-
-def test_fill_hole_by_index():
-  s1 = Hole()
-  s2 = s1.fill(Literal('x'), 0)
-  assert s1.type == PartialRegexNodeType.HOLE
-  assert s2.type == PartialRegexNodeType.LITERAL
-  assert s2.literal == 'x'
-
-def test_fill_hole_by_index_2():
-  s1 = Hole() * Hole()
-  s2 = s1.fill(Literal('x'), 1)
-  assert s1.type == PartialRegexNodeType.CONCATENATION
-  assert s1.left.type == PartialRegexNodeType.HOLE
-  assert s1.right.type == PartialRegexNodeType.HOLE
-  assert s2.left.type == PartialRegexNodeType.HOLE
-  assert s2.right.type == PartialRegexNodeType.LITERAL
-  assert s2.right.literal == 'x'
-
-def test_fill_no_hole():
-  s = Literal('a')
-  with pytest.raises(ValueError):
-    s.fill(Literal('b'))
-
-def test_fill_hole_with_concat_holes():
-  s = Hole().fill(Concatenation())
-  assert s.type == PartialRegexNodeType.CONCATENATION
-  assert s.left.type == PartialRegexNodeType.HOLE
-  assert s.right.type == PartialRegexNodeType.HOLE
-
-def test_fill_hole_with_union_holes():
-  s = Hole().fill(Union())
-  assert s.type == PartialRegexNodeType.UNION
-  assert s.left.type == PartialRegexNodeType.HOLE
-  assert s.right.type == PartialRegexNodeType.HOLE
-
-def test_fill_hole_with_star_hole():
-  s = Hole().fill(Star())
-  assert s.type == PartialRegexNodeType.STAR
-  assert s.left.type == PartialRegexNodeType.HOLE
-  assert s.right is None
-
 def test_literal_too_long():
   with pytest.raises(ValueError):
     PartialRegexNode(PartialRegexNodeType.LITERAL, 'ab')
