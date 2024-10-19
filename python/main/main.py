@@ -19,6 +19,7 @@ def main(examples: str) -> None:
   N: set[str] = set()
   with open(examples, 'r', encoding="utf-8") as f:
     description = f.readline().strip()
+    print(f'{description} | ', end='', flush=True)
     active_set = P
     for line in f:
       line = line.strip()
@@ -36,7 +37,7 @@ def main(examples: str) -> None:
   if dt < 1:
     dt *= 1000
     units = 'ms'
-  print(f'{description} | {pattern} | {dt:0.2f} {units}')
+  print(f'{pattern} | {dt:0.2f} {units}')
 
 if __name__ == '__main__':
   if len(sys.argv) == 1:

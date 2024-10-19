@@ -1,0 +1,36 @@
+#!/usr/bin/bash
+
+usage() {
+  echo "usage: ./benchmark [options]"
+  echo "Run the benchmark languages."
+  echo ""
+  echo "-t, --timeout <DURATION>  set the timeout. default: 10 seconds."
+  echo "--help                    display this help and exit"
+  exit 0
+}
+
+timelimit=10  # seconds
+selector="*"
+
+while getopts "ht:o:-:" opt; do
+  case $opt in
+    t) timelimit=${OPTARG};;
+    o) selector="${OPTARG}*";;
+    h) usage;;
+    -)
+    case "${OPTARG}" in
+      timeout) timelimit=${OPTARG};;
+      help) usage;;
+    esac
+    ;;
+  esac
+done
+
+cnt=1
+for file in $(ls "../benchmarks/${selector}"); do
+  printf "%2d | " $cnt
+  if ! timeout $timelimit python3 -m main.main $file; then
+    echo "X | TIMEOUT"
+  fi
+  (( cnt++ ))
+done
