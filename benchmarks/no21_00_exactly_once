@@ -1,4 +1,4 @@
-w has exactly one pair of consecutive 0s.
+00 exactly once
 ++
 00
 1001
@@ -9,3 +9,6 @@ w has exactly one pair of consecutive 0s.
 11
 000
 00100
+X000
+1100011
+1011000

@@ -1,14 +1,9 @@
 does not end with 01
 ++
-X
-X0
-11
-XX0
-X11
-XXX0
-XX11
-XXX11
+1
+XXXX0
+XXX1X
 --
 01
 X01
-XX01
+XXX01

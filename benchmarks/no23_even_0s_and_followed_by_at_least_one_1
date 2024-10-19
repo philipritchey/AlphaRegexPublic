@@ -1,0 +1,22 @@
+even number of 0s and each 0 is followed by at least one 1
+++
+1
+11
+111
+0101
+1111
+10101
+0111011
+--
+0
+0X
+X0
+0XX
+10X
+110
+011X
+110X
+X0XX
+XXX0
+10001
+0100101

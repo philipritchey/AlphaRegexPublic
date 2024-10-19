@@ -1,6 +1,4 @@
-The set of all strings of 0s and 1s such that
-every pair of adjacent 0s appears
-before any pair of adjacent 1s.
+every pair of adjacent 0s appears before any pair of adjacent 1s
 ++
 0
 1

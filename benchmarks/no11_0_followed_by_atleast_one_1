@@ -1,4 +1,4 @@
-each 0 in w is followed by at least one 1
+each 0 is followed by at least one 1
 ++
 1
 111
