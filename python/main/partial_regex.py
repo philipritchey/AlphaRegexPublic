@@ -228,9 +228,6 @@ class PartialRegexNode:
   def next_states(self, literals: str) -> list[Self]:
     states = []
     c = self.copy()
-    # reset _cost and _str because we expect to fill in a hole
-    c._cost = -1
-    c._str = ''
     q = [c]
     while len(q) > 0:
       node = q.pop()
@@ -267,6 +264,7 @@ class PartialRegexNode:
         node.left = None
         node.right = None
         node.literal = None
+        break
       elif node.left:
         q.append(node.left)
         if node.right:
