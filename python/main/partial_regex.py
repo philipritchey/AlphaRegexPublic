@@ -228,11 +228,13 @@ class PartialRegexNode:
   def next_states(self, literals: str) -> list[Self]:
     states = []
     c = self.copy()
+    # reset _cost and _str because we expect to fill in a hole
+    c._cost = -1
+    c._str = ''
     q = [c]
     while len(q) > 0:
       node = q.pop()
       if node.type == PartialRegexNodeType.HOLE:
-        node._cost = -1
         node.type = PartialRegexNodeType.LITERAL
         node.left = None
         node.right = None

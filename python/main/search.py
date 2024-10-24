@@ -24,9 +24,11 @@ def search(P: set[str], N: set[str], alphabet: str = '01') -> str:
   heapq.heappush(q, Hole())
   v_pre: set[PartialRegexNode] = set()
   v_post: set[PartialRegexNode] = set()
-  while True:
+  while len(q) > 0:
     state = heapq.heappop(q)
+    # print(f'[DEBUG] {state=} {state}')
     if state in v_post:
+      # print('        skipped')
       continue
     v_post.add(state)
     if state.is_solution(P, N):
@@ -34,6 +36,12 @@ def search(P: set[str], N: set[str], alphabet: str = '01') -> str:
     if not state.is_dead(P, N):
       # expand and add to queue
       for next_state in state.next_states(alphabet):
+        # print(f'        {next_state=} {next_state}', end='')
         if next_state not in v_pre:
           heapq.heappush(q, next_state)
           v_pre.add(next_state)
+    #       print(' added')
+    #     else:
+    #       print(' NOT added')
+    # else:
+    #   print('        dead')

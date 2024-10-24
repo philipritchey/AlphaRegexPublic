@@ -1,6 +1,12 @@
 #!/usr/bin/bash
 
-if python3 -m pytest --cov-config=.coveragerc --cov-report term-missing --cov=main tests/; then
+if [[ $# -eq 1 ]]; then
+  # run only a single test (without coverage)
+  python3 -m pytest $1
+else
+  # run all tests (with coverage)
+  if python3 -m pytest --cov-config=.coveragerc --cov-report term-missing --cov=main tests/; then
     git add .
     git commit -m "autocommit: passing all tests with >= 90% coverage"
+  fi
 fi

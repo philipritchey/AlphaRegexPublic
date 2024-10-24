@@ -177,6 +177,19 @@ def test_state_expansion_2():
   assert Hole() * Union() in states
   assert Hole() * Star() in states
 
+def test_state_expansion_of_star_of_hole():
+  s = Star(Hole())
+  alphabet = '01'
+  states = s.next_states(alphabet)
+  assert len(states) == 8
+  for literal in alphabet + '.':
+    assert Star(Literal(literal)) in states
+  assert Star(EmptyString()) in states
+  assert Star(EmptyLanguage()) in states
+  assert Star(Concatenation()) in states
+  assert Star(Union()) in states
+  assert Star(Star()) in states
+
 def test_ordering():
   empty = EmptyString()
   hole = Hole()
@@ -234,6 +247,19 @@ def test_hash():
   s2 = Star()
   s2.left = EmptyString()
   assert hash(s1) == hash(opt(s2))
+
+  assert hash(Star(Literal('0'))) == hash(Star(Literal('0')))
+
+  assert hash(Star(Literal('1'))) != hash(Literal('0'))
+  assert hash(Star(Literal('1'))) != hash(Literal('1'))
+  assert hash(Star(Literal('1'))) != hash(Literal('.'))
+  assert hash(Star(Literal('1'))) != hash(EmptyString())
+  assert hash(Star(Literal('1'))) != hash(EmptyLanguage())
+  assert hash(Star(Literal('1'))) != hash(Star())
+  assert hash(Star(Literal('1'))) != hash(Concatenation())
+  assert hash(Star(Literal('1'))) != hash(Union())
+  assert hash(Star(Literal('1'))) != hash(Star(Literal('0')))
+
 
 def test_eq():
   s1 = EmptyString()

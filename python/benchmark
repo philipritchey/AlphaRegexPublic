@@ -5,7 +5,8 @@ usage() {
   echo "Run the benchmark languages."
   echo ""
   echo "-t, --timeout <DURATION>  set the timeout. default: 10 seconds."
-  echo "--help                    display this help and exit"
+  echo "-o <NUMBER>               run only the specified benchmark."
+  echo "--help                    display this help and exit."
   exit 0
 }
 
