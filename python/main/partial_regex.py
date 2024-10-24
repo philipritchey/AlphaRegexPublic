@@ -38,6 +38,7 @@ class PartialRegexNode:
         raise ValueError('length of literal must be exactly 1')
       self.literal = literal
     self._cost: int = -1
+    self._str: str = ''
 
   def __eq__(self, other: Self) -> bool:
     return str(self) == str(other)
@@ -78,6 +79,17 @@ class PartialRegexNode:
     return f"Literal('{self.literal}')"
 
   def __str__(self) -> str:
+    if not self._str:
+      self._str = self.to_str()
+    return self._str
+
+  def to_str(self) -> str:
+    '''
+    convert to string
+
+    Returns:
+        str: string representaion of this regex
+    '''
     if self.type == PartialRegexNodeType.CONCATENATION:
       if self.right.type == PartialRegexNodeType.EMPTY_STRING:
         return str(self.left)
