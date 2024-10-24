@@ -2,6 +2,8 @@
 main
 '''
 import sys
+from cProfile import Profile
+from pstats import SortKey, Stats
 from time import time
 from main.search import search
 
@@ -45,4 +47,11 @@ if __name__ == '__main__':
     sys.exit(1)
   examples = sys.argv[1]
   # print(f'{examples=}')
-  main(examples)
+  with Profile() as profile:
+    main(examples)
+    (
+      Stats(profile)
+      .strip_dirs()
+      .sort_stats(SortKey.CALLS)
+      .print_stats()
+    )

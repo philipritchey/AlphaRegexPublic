@@ -227,12 +227,12 @@ class PartialRegexNode:
         for literal in literals + '.':
           node.literal = literal
           states.append(c.copy())
-        
+
         node.literal = None
 
         node.type = PartialRegexNodeType.EMPTY_STRING
         states.append(c.copy())
-        
+
         node.type = PartialRegexNodeType.EMPTY_LANGUAGE
         states.append(c.copy())
 
