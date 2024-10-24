@@ -264,7 +264,7 @@ class PartialRegexNode:
         node.left = None
         node.right = None
         node.literal = None
-        break
+        q.clear()
       elif node.left:
         q.append(node.left)
         if node.right:

@@ -158,38 +158,13 @@ def test_state_expansion():
   assert Union() in states
   assert Star() in states
 
-# def test_state_expansion_2():
-#   s = Hole() * Hole()
-#   alphabet = 'abc'
-#   states = s.next_states(alphabet)
-#   assert len(states) == 18
-#   for literal in alphabet + '.':
-#     assert Literal(literal) * Hole() in states
-#     assert Hole() * Literal(literal) in states
-#   assert EmptyString() * Hole() in states
-#   assert EmptyLanguage() * Hole() in states
-#   assert Concatenation() * Hole() in states
-#   assert Union() * Hole() in states
-#   assert Star() * Hole() in states
-#   assert Hole() * EmptyString() in states
-#   assert Hole() * EmptyLanguage() in states
-#   assert Hole() * Concatenation() in states
-#   assert Hole() * Union() in states
-#   assert Hole() * Star() in states
-
 def test_state_expansion_2():
   s = Hole() * Hole()
   alphabet = 'abc'
   states = s.next_states(alphabet)
   assert len(states) == 9
   for literal in alphabet + '.':
-    # assert Literal(literal) * Hole() in states
     assert Hole() * Literal(literal) in states
-  # assert EmptyString() * Hole() in states
-  # assert EmptyLanguage() * Hole() in states
-  # assert Concatenation() * Hole() in states
-  # assert Union() * Hole() in states
-  # assert Star() * Hole() in states
   assert Hole() * EmptyString() in states
   assert Hole() * EmptyLanguage() in states
   assert Hole() * Concatenation() in states
