@@ -24,7 +24,7 @@ def search(P: set[str], N: set[str], alphabet: str = '01') -> str:
   heapq.heappush(q, Hole())
   v_pre: set[PartialRegexNode] = set()
   v_post: set[PartialRegexNode] = set()
-  while len(q) > 0:
+  while True:
     state = heapq.heappop(q)
     # print(f'[DEBUG] {state=} {state}')
     if state in v_post:
