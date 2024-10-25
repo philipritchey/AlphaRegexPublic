@@ -42,16 +42,20 @@ def main(examples: str) -> None:
   print(f'{pattern} | {dt:0.2f} {units}')
 
 if __name__ == '__main__':
+  # [--profile] <filename>
   if len(sys.argv) == 1:
     print('error: missing required examples filename')
     sys.exit(1)
-  examples = sys.argv[1]
+  examples = sys.argv[-1]
   # print(f'{examples=}')
-  with Profile() as profile:
+  if '--profile' in sys.argv:
+    with Profile() as profile:
+      main(examples)
+      (
+        Stats(profile)
+        .strip_dirs()
+        .sort_stats(SortKey.CALLS)
+        .print_stats()
+      )
+  else:
     main(examples)
-    (
-      Stats(profile)
-      .strip_dirs()
-      .sort_stats(SortKey.CALLS)
-      .print_stats()
-    )
