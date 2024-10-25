@@ -6,12 +6,14 @@ usage() {
   echo ""
   echo "-t, --timeout <DURATION>  set the timeout. default: 10 seconds."
   echo "-o <NUMBER>               run only the specified benchmark."
+  echo "--profile                 run with profiling enabled."
   echo "--help                    display this help and exit."
   exit 0
 }
 
 timelimit=10  # seconds
 selector="*"
+profile=""
 
 while getopts "ht:o:-:" opt; do
   case $opt in
@@ -24,6 +26,7 @@ while getopts "ht:o:-:" opt; do
     -)
     case "${OPTARG}" in
       timeout) timelimit=${OPTARG};;
+      profile) profile="--profile";;
       help) usage;;
     esac
     ;;
@@ -37,7 +40,7 @@ else
 fi
 for file in $(ls ../benchmarks/${selector}); do
   printf "%2d | " ${cnt}
-  if ! timeout ${timelimit} python3 -m main.main ${file}; then
+  if ! timeout ${timelimit} python3 -m main.main ${profile} ${file}; then
     echo "X | TIMEOUT"
   fi
   (( cnt++ ))
