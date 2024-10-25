@@ -146,7 +146,7 @@ class PartialRegexNode:
         int: the cost
     '''
     c_literal = 1
-    c_concatenation = 5
+    c_concatenation = 1
     c_star = 20
     c_optional = 20
     c_union = 30
@@ -266,9 +266,9 @@ class PartialRegexNode:
         node.literal = None
         q.clear()
       elif node.left:
-        q.append(node.left)
         if node.right:
           q.append(node.right)
+        q.append(node.left)
     return states
 
   def overapproximation(self) -> Self:
