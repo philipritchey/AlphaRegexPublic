@@ -3,6 +3,13 @@ helpers
 '''
 import re
 
+def simplify(pattern: str) -> str:
+  e2 = pattern.replace('**', '*').replace('??', '?').replace('*?', '*').replace('?*', '*')
+  while e2 != pattern:
+    pattern = e2
+    e2 = pattern.replace('**', '*').replace('??', '?').replace('*?', '*').replace('?*', '*')
+  return pattern
+
 def matches_all(pattern: str, examples: set[str]) -> bool:
   '''
   checks whether the pattern matches ALL examples
@@ -14,6 +21,7 @@ def matches_all(pattern: str, examples: set[str]) -> bool:
   Returns:
       bool: True iff the pattern matches ALL examples
   '''
+  pattern = simplify(pattern)
   for example in examples:
     if not re.fullmatch(pattern, example):
       return False
@@ -30,6 +38,7 @@ def matches_any(pattern: str, examples: set[str]) -> bool:
   Returns:
       bool: True iff the pattern matches SOME example
   '''
+  pattern = simplify(pattern)
   for example in examples:
     if re.fullmatch(pattern, example):
       return True
