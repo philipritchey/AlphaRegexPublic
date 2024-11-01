@@ -3,7 +3,7 @@ Search
 '''
 
 import heapq
-from main.partial_regex import PartialRegexNode, Hole
+from main.partial_regex import PartialRegexNode, Hole, opt
 from main.helpers import inflate_all
 
 def search(P: set[str], N: set[str], alphabet: str = '01') -> str:
@@ -32,7 +32,7 @@ def search(P: set[str], N: set[str], alphabet: str = '01') -> str:
       continue
     v_post.add(state)
     if state.is_solution(P, N):
-      return str(state)
+      return str(opt(state))
     if not state.is_dead(P, N):
       # expand and add to queue
       for next_state in state.next_states(alphabet):
