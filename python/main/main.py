@@ -7,7 +7,34 @@ from pstats import SortKey, Stats
 from time import time
 from main.search import search
 
-def main(examples: str) -> None:
+def read_examples(examples_file: str) -> dict[str, set[str]]:
+  '''
+  read examples
+
+  Args:
+      examples_file (str): path to examples file
+
+  Returns:
+      dict[str, set[str]]: P: positive examples, N: negative examples
+  '''
+  examples: dict[str, set[str]] = {}
+  examples['P'] = set()
+  examples['N'] = set()
+  with open(examples_file, 'r', encoding="utf-8") as f:
+    description = f.readline().strip()
+    print(f'{description} | ', end='', flush=True)
+    active_set = examples['P']
+    for line in f:
+      line = line.strip()
+      if line == '++':
+        active_set = examples['P']
+      elif line == '--':
+        active_set = examples['N']
+      else:
+        active_set.add(line)
+  return examples
+
+def main(examples: dict[str, set[str]]) -> None:
   '''
   the entry point of the program
 
@@ -17,22 +44,8 @@ def main(examples: str) -> None:
                       "++" on a line begins positive exmaples.
                       "--" on a line begins negatvie examples.
   '''
-  P: set[str] = set()
-  N: set[str] = set()
-  with open(examples, 'r', encoding="utf-8") as f:
-    description = f.readline().strip()
-    print(f'{description} | ', end='', flush=True)
-    active_set = P
-    for line in f:
-      line = line.strip()
-      if line == '++':
-        active_set = P
-      elif line == '--':
-        active_set = N
-      else:
-        active_set.add(line)
   t1 = time()
-  pattern = search(P, N)
+  pattern = search(examples['P'], examples['N'])
   t2 = time()
   dt = t2 - t1
   units = 's'
@@ -46,11 +59,11 @@ if __name__ == '__main__':
   if len(sys.argv) == 1:
     print('error: missing required examples filename')
     sys.exit(1)
-  examples = sys.argv[-1]
+  EXAMPLES = read_examples(sys.argv[-1])
   # print(f'{examples=}')
   if '--profile' in sys.argv:
     with Profile() as profile:
-      main(examples)
+      main(EXAMPLES)
       (
         Stats(profile)
         .strip_dirs()
@@ -58,4 +71,4 @@ if __name__ == '__main__':
         .print_stats()
       )
   else:
-    main(examples)
+    main(EXAMPLES)
