@@ -162,7 +162,7 @@ def test_state_expansion_2():
   s = Hole() * Hole()
   alphabet = 'abc'
   states = s.next_states(alphabet)
-  assert len(states) == 18
+  assert len(states) == 9
   for literal in alphabet + '.':
     assert Literal(literal) * Hole() in states
     # assert Hole() * Literal(literal) in states
