@@ -498,3 +498,164 @@ def test_cost_of_21():
   # solution my code found with same examples: (.(...|0))*
   state2 = Star(Literal('.') * Union(Literal('.') * Literal('.') * Literal('.'), Literal('0')))
   assert state2.cost() <= state1.cost()
+
+def test_cost_of_10():
+  # solution in paper: 1?(01)*0? = (1|λ)(01)*(0|λ)
+  paper_soln = Concatenation(
+    Concatenation(
+      Union(
+        Literal('1'),
+        EmptyString()
+      ),
+      Star(
+        Concatenation(
+          Literal('0'),
+          Literal('1')
+        )
+      )
+    ),
+    Union(
+      Literal('0'),
+      EmptyString()
+    )
+  )
+  # solution my implementation finds: (0|λ)(1(0|(010*)*)|λ)
+  my_soln = Concatenation(
+    Union(
+      Literal('0'),
+      EmptyString()
+    ),
+    Union(
+      Concatenation(
+        Literal('1'),
+        Union(
+          Literal('0'),
+          Star(
+            Concatenation(
+              Concatenation(
+                Literal('0'),
+                Literal('1')
+              ),
+              Star(
+                Literal('0')
+              )
+            )
+          )
+        )
+      ),
+      EmptyString()
+    )
+  )
+  # solution l-star finds: (1|01)*(0|λ)
+  lstar_soln = Concatenation(
+    Star(
+      Union(
+        Literal('1'),
+        Concatenation(
+          Literal('0'),
+          Literal('1')
+        )
+      )
+    ),
+    Union(
+      Literal('0'),
+      EmptyString()
+    )
+  )
+  # this is weird, it should find the cheaper solution first
+  assert paper_soln.cost() == 89, f"got: {paper_soln.cost()}"
+  assert my_soln.cost() == 142, f"got: {my_soln.cost()}"
+  assert lstar_soln.cost() == 87, f"got: {lstar_soln.cost()}"
+
+def test_cost_of_14():
+  # solution in paper: (0+1(0+1))((0+1)(0+1))* = (0|1.)(..)*
+  paper_soln = Concatenation(
+    Union(
+      Literal('0'),
+      Concatenation(
+        Literal('1'),
+        Union(
+          Literal('0'),
+          Literal('1')
+        )
+      )
+    ),
+    Star(
+      Concatenation(
+        Union(
+          Literal('0'),
+          Literal('1')
+        ),
+        Union(
+          Literal('0'),
+          Literal('1')
+        )
+      )
+    )
+  )
+  # solution lstar finds: (0|(1|0(0|1))((0|1)(0|1))*(0|1)) = 0|(1|0.)(..)*.
+  lstar_soln = Union(
+    Literal('0'),
+    Concatenation(
+      Concatenation(
+        Union(
+          Literal('1'),
+          Concatenation(
+            Literal('0'),
+            Union(
+              Literal('0'),
+              Literal('1')
+            )
+          )
+        ),
+        Star(
+          Concatenation(
+            Union(
+              Literal('0'),
+              Literal('1')
+            ),
+            Union(
+              Literal('0'),
+              Literal('1')
+            )
+          )
+        )
+      ),
+      Union(
+        Literal('0'),
+        Literal('1')
+      )
+    )
+  )
+  assert paper_soln.cost() == 151, f"got: {paper_soln.cost()}"
+  assert lstar_soln.cost() == 215, f"got: {lstar_soln.cost()}"
+
+def test_cost_of_22():
+  # solution in paper: (0+1)(0+1)*1+(0+1)*0(0+1) = ..*1|.*0.
+  paper_soln = Union(
+    Concatenation(
+      Concatenation(
+        Union(Literal('0'), Literal('1')),
+        Star(Union(Literal('0'), Literal('1')))
+      ),
+      Literal('1')
+    ),
+    Concatenation(
+      Star(Union(Literal('0'), Literal('1'))),
+      Concatenation(
+        Literal('0'),
+        Union(Literal('0'), Literal('1'))
+      )
+    )
+  )
+  # my solution (by hand): .*(0.|.1)
+  my_soln = Concatenation(
+    Star(Union(Literal('0'), Literal('1'))),
+    Union(
+      Concatenation(Literal('0'), Union(Literal('0'), Literal('1'))),
+      Concatenation(Union(Literal('0'), Literal('1')), Literal('1'))
+    )
+  )
+  # this is weird, it should find the cheaper solution first
+  assert paper_soln.cost() == 204, f"got: {paper_soln.cost()}"
+  assert my_soln.cost() == 151, f"got: {my_soln.cost()}"
