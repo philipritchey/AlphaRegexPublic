@@ -24,6 +24,7 @@ def search(P: set[str], N: set[str], alphabet: str = '01') -> str:
   heapq.heappush(q, Hole())
   v_pre: set[PartialRegexNode] = set()
   v_post: set[PartialRegexNode] = set()
+  cost_limit = 252
   while True:
     state = heapq.heappop(q)
     # print(f'[DEBUG] {state=} {state}')
@@ -37,7 +38,7 @@ def search(P: set[str], N: set[str], alphabet: str = '01') -> str:
       # expand and add to queue
       for next_state in state.next_states(alphabet):
         # print(f'        {next_state=} {next_state}', end='')
-        if next_state not in v_pre:
+        if next_state.cost() <= cost_limit and next_state not in v_pre:
           heapq.heappush(q, next_state)
           v_pre.add(next_state)
     #       print(' added')
