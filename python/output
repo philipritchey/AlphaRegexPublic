@@ -1,0 +1,4 @@
+30 | ends with an even number of 1s | 
+[DEBUG] state=Star(Union(Literal('0'), Concatenation(Literal('1'), Hole()))) ((0|1□))* 153
+        dead
+X | TIMEOUT
