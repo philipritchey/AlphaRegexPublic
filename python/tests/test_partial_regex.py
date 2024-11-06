@@ -181,14 +181,14 @@ def test_state_expansion_of_star_of_hole():
   s = Star(Hole())
   alphabet = '01'
   states = s.next_states(alphabet)
-  assert len(states) == 8
+  assert len(states) == 7
   for literal in alphabet + '.':
     assert Star(Literal(literal)) in states
   assert Star(EmptyString()) in states
   assert Star(EmptyLanguage()) in states
   assert Star(Concatenation()) in states
   assert Star(Union()) in states
-  assert Star(Star()) in states
+  assert Star(Star()) not in states
 
 def test_ordering():
   empty = EmptyString()
@@ -659,3 +659,21 @@ def test_cost_of_22():
   # this is weird, it should find the cheaper solution first
   assert paper_soln.cost() == 204, f"got: {paper_soln.cost()}"
   assert my_soln.cost() == 151, f"got: {my_soln.cost()}"
+
+def test_cost_no30():
+  '''
+  [] : 100
+  []* : 120
+  ([]|[])* : 250
+  (0|[])* : 151
+  (0|[][])* : 252
+  (0|1[])* : 153
+  (0|1.)* : 54
+  '''
+  assert Hole().cost() == 100
+  assert Star().cost() == 120
+  assert Star(Union()).cost() == 250
+  assert Star(Union(Literal('0'), Hole())).cost() == 151
+  assert Star(Union(Literal('0'), Concatenation())).cost() == 252
+  assert Star(Union(Literal('0'), Concatenation(Literal('1'), Hole()))).cost() == 153
+  assert Star(Union(Literal('0'), Concatenation(Literal('1'), Literal('.')))).cost() == 54

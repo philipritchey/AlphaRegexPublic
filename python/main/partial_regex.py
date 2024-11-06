@@ -228,9 +228,9 @@ class PartialRegexNode:
   def next_states(self, literals: str) -> list[Self]:
     states = []
     c = self.copy()
-    q = [c]
+    q = [(c, None)]
     while len(q) > 0:
-      node = q.pop()
+      node, parent_type = q.pop()
       if node.type == PartialRegexNodeType.HOLE:
         node.type = PartialRegexNodeType.LITERAL
         node.left = None
@@ -249,8 +249,10 @@ class PartialRegexNode:
 
         node.left = Hole()
 
-        node.type = PartialRegexNodeType.STAR
-        states.append(c.copy())
+        # avoid []* -> ([]*)*
+        if parent_type != PartialRegexNodeType.STAR:
+          node.type = PartialRegexNodeType.STAR
+          states.append(c.copy())
 
         node.right = Hole()
 
@@ -267,8 +269,8 @@ class PartialRegexNode:
         q.clear()
       elif node.left:
         if node.right:
-          q.append(node.right)
-        q.append(node.left)
+          q.append((node.right, node.type))
+        q.append((node.left, node.type))
     return states
 
   def overapproximation(self) -> Self:
@@ -410,14 +412,14 @@ class PartialRegexNode:
     #   print(f'[DEBUG] state={repr(o)}')
     #   raise ValueError('WTF!?')
     if not matches_all(overapproximation, P):
-      # dead
+      # dead because does not match some positive examples
       return True
 
     u = self.underapproximation()
     s = u  # opt(u)
     underapproximation = str(s)
     if matches_any(underapproximation, N):
-      # dead
+      # dead because matches some negative example
       return True
 
     # redundant states
@@ -427,7 +429,7 @@ class PartialRegexNode:
       overapproximation = o  # opt(o)
       pattern = str(overapproximation)
       if not matches_any(pattern, P):
-        # dead
+        # dead because does not match any positive example
         return True
     return False
 
