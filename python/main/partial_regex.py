@@ -408,6 +408,7 @@ class PartialRegexNode:
     o = self.overapproximation()
     s = o  # opt(o)
     overapproximation = str(s)
+    # print(f"{overapproximation=}")
     # if overapproximation == '..*??':
     #   print(f'[DEBUG] state={repr(o)}')
     #   raise ValueError('WTF!?')
@@ -418,6 +419,7 @@ class PartialRegexNode:
     u = self.underapproximation()
     s = u  # opt(u)
     underapproximation = str(s)
+    # print(f"{underapproximation=}")
     if matches_any(underapproximation, N):
       # dead because matches some negative example
       return True
@@ -427,6 +429,7 @@ class PartialRegexNode:
     for e in A:
       o = e.overapproximation()
       overapproximation = o  # opt(o)
+      # print(f"{overapproximation=}")
       pattern = str(overapproximation)
       if not matches_any(pattern, P):
         # dead because does not match any positive example

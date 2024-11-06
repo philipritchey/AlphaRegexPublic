@@ -677,3 +677,112 @@ def test_cost_no30():
   assert Star(Union(Literal('0'), Concatenation())).cost() == 252
   assert Star(Union(Literal('0'), Concatenation(Literal('1'), Hole()))).cost() == 153
   assert Star(Union(Literal('0'), Concatenation(Literal('1'), Literal('.')))).cost() == 54
+
+  '''
+  [] : 100
+  [][] : 201
+  []*[] : 221
+  0*[] : 122
+  0*[]* : 142
+  0*([][])* : 243
+  0*(1[])* : 144
+  0*(1[][])* : 245
+  0*(1.[])* : 146
+  0*(1.[]*)* : 166
+  0*(1.0*)* : 67
+  '''
+  assert Hole().cost() == 100
+  assert Concatenation().cost() == 201
+  assert Concatenation(Star(), Hole()).cost() == 221
+  assert Concatenation(Star(Literal('0')), Hole()).cost() == 122
+  assert Concatenation(Star(Literal('0')), Star()).cost() == 142
+  assert Concatenation(Star(Literal('0')), Star(Concatenation())).cost() == 243
+  assert Concatenation(Star(Literal('0')), Star(Concatenation(Literal('1'), Hole()))).cost() == 144
+  assert Concatenation(Star(Literal('0')), Star(Concatenation(Literal('1'), Concatenation()))).cost() == 245
+  assert Concatenation(Star(Literal('0')), Star(Concatenation(Literal('1'), Concatenation(Literal('.'), Hole())))).cost() == 146
+  assert Concatenation(Star(Literal('0')), Star(Concatenation(Literal('1'), Concatenation(Literal('.'), Star())))).cost() == 166
+  assert Concatenation(Star(Literal('0')), Star(Concatenation(Literal('1'), Concatenation(Literal('.'), Star(Literal('0')))))).cost() == 67
+
+def test_is_dead_no30():
+  state = Star(Union(Literal('0'), Concatenation(Literal('1'), Hole())))
+  P = {
+    '',
+    '101111',
+    '1111',
+    '10000',
+    '010',
+    '1000',
+    '1110',
+    '00',
+    '011',
+    '10010',
+    '01100',
+    '100',
+    '0',
+    '000',
+    '11011',
+    '00100',
+    '11110',
+    '1100',
+    '00000',
+    '0000',
+    '01010',
+    '00110',
+    '0010',
+    '01000',
+    '110',
+    '11000',
+    '0110',
+    '1010',
+    '0011',
+    '10110',
+    '01111',
+    '11100',
+    '10011',
+    '11',
+    '01110',
+    '1011',
+    '001111',
+    '00011',
+    '00010',
+    '11010',
+    '10100',
+    '0100',
+    '10',
+    '01011'
+    }
+  N = {
+    '11111',
+    '00011111',
+    '11011111',
+    '0011111',
+    '00101',
+    '0001',
+    '101',
+    '001',
+    '1',
+    '110111',
+    '0111',
+    '1101',
+    '1011111',
+    '10001',
+    '00111',
+    '10011111',
+    '010111',
+    '01001',
+    '10111',
+    '01101',
+    '11101',
+    '000111',
+    '11001',
+    '01',
+    '111',
+    '1001',
+    '0101',
+    '00001',
+    '10101',
+    '011111',
+    '01011111',
+    '100111'
+    }
+  assert not state.is_dead(P, N)

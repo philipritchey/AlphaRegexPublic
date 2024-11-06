@@ -24,6 +24,7 @@ def matches_all(pattern: str, examples: set[str]) -> bool:
   pattern = simplify(pattern)
   for example in examples:
     if not re.fullmatch(pattern, example):
+      # print(f"{pattern} does not match {example}")
       return False
   return True
 
