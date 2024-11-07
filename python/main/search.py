@@ -24,23 +24,20 @@ def search(P: set[str], N: set[str], alphabet: str = '01') -> str:
   # print(f"{P=}")
   # print(f"{N=}")
   q: list[PartialRegexNode] = []
-  heapq.heappush(q, Hole())
-  v_pre: set[PartialRegexNode] = set()
-  v_post: set[PartialRegexNode] = set()
-  # cost_limit = 252
+  v_pre: set[PartialRegexNode] = {Hole()}
+  # preload queue with next states after Hole (which is never a solution)
+  for next_state in Hole().next_states(alphabet):
+    heapq.heappush(q, next_state)
+    v_pre.add(next_state)
+  # solution_cost_limit = None
   # target_state = Star(Union(Literal('0'), Concatenation(Literal('1'), Hole())))
   while True:
     state = heapq.heappop(q)
     # if state == target_state:
     #   print()
     #   print(f'[DEBUG] {state=} {state} {state.cost()}')
-    if state in v_post:
-      # if state == target_state:
-      #   print('        skipped')
-      continue
-    v_post.add(state)
-    print(state.cost())
-    if state.is_solution(P, N):
+    # print(state.cost())
+    if state.is_solution(P, N):  # and solution_cost_limit and state.cost() <= solution_cost_limit:
       return str(opt(state))
     if not state.is_dead(P, N):
       # expand and add to queue
@@ -55,8 +52,8 @@ def search(P: set[str], N: set[str], alphabet: str = '01') -> str:
           heapq.heappush(q, next_state)
           v_pre.add(next_state)
     #     print(' added')
-    #   else:
-    #     print(' NOT added')
+      # else:
+      #   print(' NOT added')
     # else:
     #   if state == target_state:
     #     print('        dead')

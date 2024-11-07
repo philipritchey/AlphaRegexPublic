@@ -1,11 +1,13 @@
 at most one pair of consecutive 1s
 ++
+
 0
 00
 11
 101010
 00011000
 00100110001
+1100
 --
 111
 110011
@@ -21,3 +23,5 @@ at most one pair of consecutive 1s
 X011100X
 1110
 XX011100
+X0110001100
+110110
