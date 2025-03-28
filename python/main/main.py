@@ -54,7 +54,7 @@ def main(examples: dict[str, set[str]]) -> None:
     units = 'ms'
   print(f'{pattern} | {dt:0.2f} {units}')
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
   # [--profile] <filename>
   if len(sys.argv) == 1:
     print('error: missing required examples filename')
